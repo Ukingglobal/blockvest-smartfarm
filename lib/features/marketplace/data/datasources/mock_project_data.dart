@@ -5,9 +5,11 @@ class MockProjectData {
     Project(
       id: '1',
       title: 'Organic Rice Farming Initiative',
-      description: 'Sustainable organic rice cultivation project in Lagos State using modern irrigation techniques and eco-friendly practices. This project aims to produce premium quality organic rice for both local and export markets.',
+      description:
+          'Sustainable organic rice cultivation project in Lagos State using modern irrigation techniques and eco-friendly practices. This project aims to produce premium quality organic rice for both local and export markets.',
       location: 'Lagos State, Nigeria',
-      imageUrl: 'https://images.unsplash.com/photo-1574323347407-f5e1ad6d020b?w=800',
+      imageUrl:
+          'https://images.unsplash.com/photo-1574323347407-f5e1ad6d020b?w=800',
       imageUrls: [
         'https://images.unsplash.com/photo-1574323347407-f5e1ad6d020b?w=800',
         'https://images.unsplash.com/photo-1500937386664-56d1dfef3854?w=800',
@@ -26,7 +28,8 @@ class MockProjectData {
       createdAt: DateTime(2023, 12, 1),
       farmerId: 'farmer_001',
       farmerName: 'Adebayo Ogundimu',
-      farmerAvatar: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150',
+      farmerAvatar:
+          'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150',
       investorCount: 127,
       highlights: [
         'Certified organic farming practices',
@@ -50,13 +53,15 @@ class MockProjectData {
       rating: 4.8,
       reviewCount: 89,
     ),
-    
+
     Project(
       id: '2',
       title: 'Smart Poultry Farm Expansion',
-      description: 'Expansion of automated poultry farm with IoT monitoring systems, climate control, and sustainable feed production. Focus on free-range chicken and organic egg production.',
+      description:
+          'Expansion of automated poultry farm with IoT monitoring systems, climate control, and sustainable feed production. Focus on free-range chicken and organic egg production.',
       location: 'Ogun State, Nigeria',
-      imageUrl: 'https://images.unsplash.com/photo-1548550023-2bdb3c5beed7?w=800',
+      imageUrl:
+          'https://images.unsplash.com/photo-1548550023-2bdb3c5beed7?w=800',
       imageUrls: [
         'https://images.unsplash.com/photo-1548550023-2bdb3c5beed7?w=800',
         'https://images.unsplash.com/photo-1551218808-94e220e084d2?w=800',
@@ -75,7 +80,8 @@ class MockProjectData {
       createdAt: DateTime(2023, 11, 15),
       farmerId: 'farmer_002',
       farmerName: 'Fatima Abdullahi',
-      farmerAvatar: 'https://images.unsplash.com/photo-1494790108755-2616b612b786?w=150',
+      farmerAvatar:
+          'https://images.unsplash.com/photo-1494790108755-2616b612b786?w=150',
       investorCount: 203,
       highlights: [
         'IoT-enabled smart monitoring',
@@ -103,9 +109,11 @@ class MockProjectData {
     Project(
       id: '3',
       title: 'Catfish Aquaculture Project',
-      description: 'Modern catfish farming facility with recirculating aquaculture systems (RAS) technology. Sustainable fish production with minimal environmental impact.',
+      description:
+          'Modern catfish farming facility with recirculating aquaculture systems (RAS) technology. Sustainable fish production with minimal environmental impact.',
       location: 'Delta State, Nigeria',
-      imageUrl: 'https://images.unsplash.com/photo-1544551763-46a013bb70d5?w=800',
+      imageUrl:
+          'https://images.unsplash.com/photo-1544551763-46a013bb70d5?w=800',
       imageUrls: [
         'https://images.unsplash.com/photo-1544551763-46a013bb70d5?w=800',
         'https://images.unsplash.com/photo-1559827260-dc66d52bef19?w=800',
@@ -124,7 +132,8 @@ class MockProjectData {
       createdAt: DateTime(2024, 1, 10),
       farmerId: 'farmer_003',
       farmerName: 'Emeka Okafor',
-      farmerAvatar: 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=150',
+      farmerAvatar:
+          'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=150',
       investorCount: 67,
       highlights: [
         'RAS technology implementation',
@@ -152,9 +161,11 @@ class MockProjectData {
     Project(
       id: '4',
       title: 'Cassava Processing Plant',
-      description: 'Modern cassava processing facility for producing high-quality cassava flour, starch, and ethanol. Serving local farmers and export markets.',
+      description:
+          'Modern cassava processing facility for producing high-quality cassava flour, starch, and ethanol. Serving local farmers and export markets.',
       location: 'Oyo State, Nigeria',
-      imageUrl: 'https://images.unsplash.com/photo-1605000797499-95a51c5269ae?w=800',
+      imageUrl:
+          'https://images.unsplash.com/photo-1605000797499-95a51c5269ae?w=800',
       imageUrls: [
         'https://images.unsplash.com/photo-1605000797499-95a51c5269ae?w=800',
         'https://images.unsplash.com/photo-1574323347407-f5e1ad6d020b?w=800',
@@ -173,7 +184,8 @@ class MockProjectData {
       createdAt: DateTime(2023, 10, 1),
       farmerId: 'farmer_004',
       farmerName: 'Kemi Adebisi',
-      farmerAvatar: 'https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=150',
+      farmerAvatar:
+          'https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=150',
       investorCount: 340,
       highlights: [
         'Modern processing equipment',
@@ -201,9 +213,11 @@ class MockProjectData {
     Project(
       id: '5',
       title: 'Vertical Farming Innovation',
-      description: 'Indoor vertical farming system using hydroponics and LED technology for year-round vegetable production. Focus on leafy greens and herbs.',
+      description:
+          'Indoor vertical farming system using hydroponics and LED technology for year-round vegetable production. Focus on leafy greens and herbs.',
       location: 'Abuja, FCT',
-      imageUrl: 'https://images.unsplash.com/photo-1416879595882-3373a0480b5b?w=800',
+      imageUrl:
+          'https://images.unsplash.com/photo-1416879595882-3373a0480b5b?w=800',
       imageUrls: [
         'https://images.unsplash.com/photo-1416879595882-3373a0480b5b?w=800',
         'https://images.unsplash.com/photo-1530836369250-ef72a3f5cda8?w=800',
@@ -222,7 +236,8 @@ class MockProjectData {
       createdAt: DateTime(2024, 1, 5),
       farmerId: 'farmer_005',
       farmerName: 'David Okonkwo',
-      farmerAvatar: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=150',
+      farmerAvatar:
+          'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=150',
       investorCount: 89,
       highlights: [
         'Cutting-edge technology',
@@ -257,7 +272,9 @@ class MockProjectData {
   }
 
   static List<Project> getActiveProjects() {
-    return projects.where((project) => project.status == ProjectStatus.active).toList();
+    return projects
+        .where((project) => project.status == ProjectStatus.active)
+        .toList();
   }
 
   static Project? getProjectById(String id) {
@@ -266,5 +283,34 @@ class MockProjectData {
     } catch (e) {
       return null;
     }
+  }
+
+  static List<Project> getAllProjects() {
+    return projects;
+  }
+
+  static List<Project> searchProjects(String query) {
+    final lowercaseQuery = query.toLowerCase();
+    return projects.where((project) {
+      return project.title.toLowerCase().contains(lowercaseQuery) ||
+          project.description.toLowerCase().contains(lowercaseQuery) ||
+          project.location.toLowerCase().contains(lowercaseQuery) ||
+          project.farmerName.toLowerCase().contains(lowercaseQuery);
+    }).toList();
+  }
+
+  static List<Project> getProjectsByLocation(String location) {
+    return projects
+        .where(
+          (project) =>
+              project.location.toLowerCase().contains(location.toLowerCase()),
+        )
+        .toList();
+  }
+
+  static List<Project> getFeaturedProjects() {
+    return projects
+        .where((project) => project.isVerified && project.rating >= 4.5)
+        .toList();
   }
 }

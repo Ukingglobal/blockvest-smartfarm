@@ -1,9 +1,15 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:get_it/get_it.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 
 import '../../domain/entities/project.dart';
+import '../../domain/repositories/project_repository.dart';
 import '../../data/datasources/mock_project_data.dart';
+import '../../../wallet/domain/repositories/wallet_repository.dart';
+import '../../../wallet/presentation/bloc/investment_bloc.dart';
+import '../../../wallet/presentation/widgets/investment_bottom_sheet.dart';
 
 class ProjectDetailsPage extends StatefulWidget {
   final String projectId;
@@ -692,20 +698,20 @@ class _ProjectDetailsPageState extends State<ProjectDetailsPage>
   }
 
   void _showInvestmentBottomSheet() {
-    showDialog(
+    showModalBottomSheet(
       context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Investment Coming Soon'),
-        content: const Text(
-          'Investment functionality will be available in the next update. '
-          'You will be able to invest in this project using blockchain technology.',
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(),
-            child: const Text('OK'),
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (context) => MultiBlocProvider(
+        providers: [
+          BlocProvider(
+            create: (context) => InvestmentBloc(
+              walletRepository: GetIt.instance<WalletRepository>(),
+              projectRepository: GetIt.instance<ProjectRepository>(),
+            ),
           ),
         ],
+        child: InvestmentBottomSheet(project: project!),
       ),
     );
   }

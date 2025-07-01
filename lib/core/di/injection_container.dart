@@ -6,6 +6,12 @@ import 'package:connectivity_plus/connectivity_plus.dart';
 
 import '../network/network_info.dart';
 import '../constants/app_constants.dart';
+import '../services/web3_service.dart';
+import '../../features/wallet/domain/repositories/wallet_repository.dart';
+import '../../features/wallet/data/repositories/wallet_repository_impl.dart';
+import '../../features/wallet/data/datasources/wallet_remote_data_source.dart';
+import '../../features/marketplace/domain/repositories/project_repository.dart';
+import '../../features/marketplace/data/repositories/project_repository_impl.dart';
 
 final sl = GetIt.instance;
 
@@ -26,16 +32,22 @@ Future<void> init() async {
 
   // Core
   sl.registerLazySingleton<NetworkInfo>(() => NetworkInfoImpl());
+  sl.registerLazySingleton(() => Web3Service());
 
   // Data sources
-  // TODO: Register data sources
+  sl.registerLazySingleton<WalletRemoteDataSource>(
+    () => WalletRemoteDataSourceImpl(web3Service: sl()),
+  );
 
   // Repositories
-  // TODO: Register repositories
+  sl.registerLazySingleton<WalletRepository>(
+    () => WalletRepositoryImpl(remoteDataSource: sl()),
+  );
+  sl.registerLazySingleton<ProjectRepository>(() => ProjectRepositoryImpl());
 
   // Use cases
-  // TODO: Register use cases
+  // TODO: Register use cases when needed
 
   // BLoCs
-  // TODO: Register BLoCs
+  // TODO: Register BLoCs when needed
 }
