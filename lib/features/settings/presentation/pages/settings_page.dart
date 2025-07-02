@@ -11,9 +11,7 @@ class SettingsPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Settings'),
-      ),
+      appBar: AppBar(title: const Text('Settings')),
       body: BlocListener<AuthBloc, AuthState>(
         listener: (context, state) {
           if (state is AuthUnauthenticated) {
@@ -34,7 +32,9 @@ class SettingsPage extends StatelessWidget {
                         children: [
                           CircleAvatar(
                             radius: 30,
-                            backgroundColor: Theme.of(context).colorScheme.primary,
+                            backgroundColor: Theme.of(
+                              context,
+                            ).colorScheme.primary,
                             child: Text(
                               state.user.fullName.isNotEmpty
                                   ? state.user.fullName[0].toUpperCase()
@@ -53,20 +53,26 @@ class SettingsPage extends StatelessWidget {
                               children: [
                                 Text(
                                   state.user.fullName,
-                                  style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                                        fontWeight: FontWeight.bold,
-                                      ),
+                                  style: Theme.of(context).textTheme.titleLarge
+                                      ?.copyWith(fontWeight: FontWeight.bold),
                                 ),
                                 Text(
                                   state.user.email,
-                                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                                        color: Theme.of(context).colorScheme.onSurface.withOpacity(0.7),
+                                  style: Theme.of(context).textTheme.bodyMedium
+                                      ?.copyWith(
+                                        color: Theme.of(context)
+                                            .colorScheme
+                                            .onSurface
+                                            .withOpacity(0.7),
                                       ),
                                 ),
                                 if (!state.user.isKycVerified)
                                   Container(
                                     margin: const EdgeInsets.only(top: 4),
-                                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                                    padding: const EdgeInsets.symmetric(
+                                      horizontal: 8,
+                                      vertical: 2,
+                                    ),
                                     decoration: BoxDecoration(
                                       color: Colors.orange.withOpacity(0.2),
                                       borderRadius: BorderRadius.circular(12),
@@ -98,93 +104,79 @@ class SettingsPage extends StatelessWidget {
               },
             ),
             const SizedBox(height: 16),
-            
+
             // Settings sections
-            _buildSettingsSection(
-              context,
-              'Account',
-              [
-                _buildSettingsTile(
-                  context,
-                  'Complete KYC',
-                  'Verify your identity',
-                  Icons.verified_user,
-                  () => context.go(AppRouter.kyc),
-                ),
-                _buildSettingsTile(
-                  context,
-                  'Security',
-                  'Password and security settings',
-                  Icons.security,
-                  () {
-                    // TODO: Navigate to security settings
-                  },
-                ),
-              ],
-            ),
+            _buildSettingsSection(context, 'Account', [
+              _buildSettingsTile(
+                context,
+                'Complete KYC',
+                'Verify your identity',
+                Icons.verified_user,
+                () => context.go(AppRouter.kyc),
+              ),
+              _buildSettingsTile(
+                context,
+                'Security',
+                'Biometric, KYC, and MFA settings',
+                Icons.security,
+                () => context.go(AppRouter.securitySettings),
+              ),
+            ]),
             const SizedBox(height: 16),
-            
-            _buildSettingsSection(
-              context,
-              'Preferences',
-              [
-                _buildSettingsTile(
-                  context,
-                  'Theme',
-                  'Light or dark mode',
-                  Icons.palette,
-                  () {
-                    // TODO: Show theme selector
-                  },
-                ),
-                _buildSettingsTile(
-                  context,
-                  'Language',
-                  'English',
-                  Icons.language,
-                  () {
-                    // TODO: Show language selector
-                  },
-                ),
-                _buildSettingsTile(
-                  context,
-                  'Notifications',
-                  'Manage notification preferences',
-                  Icons.notifications,
-                  () {
-                    // TODO: Navigate to notification settings
-                  },
-                ),
-              ],
-            ),
+
+            _buildSettingsSection(context, 'Preferences', [
+              _buildSettingsTile(
+                context,
+                'Theme',
+                'Light or dark mode',
+                Icons.palette,
+                () {
+                  // TODO: Show theme selector
+                },
+              ),
+              _buildSettingsTile(
+                context,
+                'Language',
+                'English',
+                Icons.language,
+                () {
+                  // TODO: Show language selector
+                },
+              ),
+              _buildSettingsTile(
+                context,
+                'Notifications',
+                'Manage notification preferences',
+                Icons.notifications,
+                () {
+                  // TODO: Navigate to notification settings
+                },
+              ),
+            ]),
             const SizedBox(height: 16),
-            
-            _buildSettingsSection(
-              context,
-              'Support',
-              [
-                _buildSettingsTile(
-                  context,
-                  'Help Center',
-                  'Get help and support',
-                  Icons.help,
-                  () {
-                    // TODO: Navigate to help center
-                  },
-                ),
-                _buildSettingsTile(
-                  context,
-                  'About',
-                  'App version and info',
-                  Icons.info,
-                  () {
-                    // TODO: Show about dialog
-                  },
-                ),
-              ],
-            ),
+
+            _buildSettingsSection(context, 'Support', [
+              _buildSettingsTile(
+                context,
+                'Help Center',
+                'Get help and support',
+                Icons.help,
+                () {
+                  // TODO: Navigate to help center
+                },
+              ),
+              _buildSettingsTile(
+                context,
+                'About',
+                'App version and info',
+                Icons.info,
+                () {
+                  // TODO: Show about dialog
+                },
+              ),
+            ]),
             const SizedBox(height: 32),
-            
+
             // Logout button
             SizedBox(
               width: double.infinity,
@@ -203,7 +195,9 @@ class SettingsPage extends StatelessWidget {
                         TextButton(
                           onPressed: () {
                             Navigator.of(context).pop();
-                            context.read<AuthBloc>().add(const SignOutRequested());
+                            context.read<AuthBloc>().add(
+                              const SignOutRequested(),
+                            );
                           },
                           child: const Text('Logout'),
                         ),
@@ -239,14 +233,12 @@ class SettingsPage extends StatelessWidget {
           child: Text(
             title,
             style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                  fontWeight: FontWeight.bold,
-                  color: Theme.of(context).colorScheme.primary,
-                ),
+              fontWeight: FontWeight.bold,
+              color: Theme.of(context).colorScheme.primary,
+            ),
           ),
         ),
-        Card(
-          child: Column(children: children),
-        ),
+        Card(child: Column(children: children)),
       ],
     );
   }

@@ -13,6 +13,7 @@ import '../../features/marketplace/presentation/pages/project_details_page.dart'
 import '../../features/wallet/presentation/pages/wallet_page.dart';
 import '../../features/governance/presentation/pages/governance_page.dart';
 import '../../features/settings/presentation/pages/settings_page.dart';
+import '../../features/security/presentation/pages/security_settings_page.dart';
 
 class AppRouter {
   static const String splash = '/';
@@ -26,6 +27,7 @@ class AppRouter {
   static const String wallet = '/wallet';
   static const String governance = '/governance';
   static const String settings = '/settings';
+  static const String securitySettings = '/security-settings';
 
   static final GoRouter router = GoRouter(
     initialLocation: splash,
@@ -90,6 +92,11 @@ class AppRouter {
         path: settings,
         name: 'settings',
         builder: (context, state) => const SettingsPage(),
+      ),
+      GoRoute(
+        path: securitySettings,
+        name: 'security-settings',
+        builder: (context, state) => const SecuritySettingsPage(),
       ),
     ],
     errorBuilder: (context, state) => Scaffold(
