@@ -14,6 +14,8 @@ import '../../features/wallet/presentation/pages/wallet_page.dart';
 import '../../features/governance/presentation/pages/governance_page.dart';
 import '../../features/settings/presentation/pages/settings_page.dart';
 import '../../features/security/presentation/pages/security_settings_page.dart';
+import '../../features/blockchain/presentation/pages/blockchain_explorer_page.dart';
+import '../../features/blockchain/presentation/pages/transaction_details_page.dart';
 
 class AppRouter {
   static const String splash = '/';
@@ -28,6 +30,10 @@ class AppRouter {
   static const String governance = '/governance';
   static const String settings = '/settings';
   static const String securitySettings = '/security-settings';
+  static const String blockchainExplorer = '/blockchain-explorer';
+  static const String transactionDetails = '/transaction-details';
+  static const String blockDetails = '/block-details';
+  static const String contractDetails = '/contract-details';
 
   static final GoRouter router = GoRouter(
     initialLocation: splash,
@@ -97,6 +103,19 @@ class AppRouter {
         path: securitySettings,
         name: 'security-settings',
         builder: (context, state) => const SecuritySettingsPage(),
+      ),
+      GoRoute(
+        path: blockchainExplorer,
+        name: 'blockchain-explorer',
+        builder: (context, state) => const BlockchainExplorerPage(),
+      ),
+      GoRoute(
+        path: transactionDetails,
+        name: 'transaction-details',
+        builder: (context, state) {
+          final txHash = state.extra as String? ?? '';
+          return TransactionDetailsPage(transactionHash: txHash);
+        },
       ),
     ],
     errorBuilder: (context, state) => Scaffold(

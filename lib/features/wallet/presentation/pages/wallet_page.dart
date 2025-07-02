@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:get_it/get_it.dart';
+import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 
 import '../bloc/wallet_bloc.dart';
@@ -58,6 +59,13 @@ class _WalletPageState extends State<WalletPage>
               onPressed: () {
                 context.read<WalletBloc>().add(const RefreshBalanceEvent());
               },
+            ),
+            IconButton(
+              icon: const Icon(Icons.explore),
+              onPressed: () {
+                context.push('/blockchain-explorer');
+              },
+              tooltip: 'Blockchain Explorer',
             ),
             IconButton(
               icon: const Icon(Icons.settings),

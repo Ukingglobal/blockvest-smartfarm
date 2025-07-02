@@ -1,13 +1,56 @@
 import 'dart:convert';
 import 'dart:math';
+import 'dart:async';
 import 'package:web3dart/web3dart.dart';
 import 'package:http/http.dart' as http;
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
-import '../constants/app_constants.dart';
+
+// Custom exceptions for Web3 operations
+class Web3Exception implements Exception {
+  final String message;
+  Web3Exception(this.message);
+
+  @override
+  String toString() => 'Web3Exception: $message';
+}
+
+class NetworkException implements Exception {
+  final String message;
+  NetworkException(this.message);
+
+  @override
+  String toString() => 'NetworkException: $message';
+}
+
+class TransactionException implements Exception {
+  final String message;
+  final String? transactionHash;
+  TransactionException(this.message, {this.transactionHash});
+
+  @override
+  String toString() =>
+      'TransactionException: $message${transactionHash != null ? ' (TX: $transactionHash)' : ''}';
+}
+
+class InsufficientFundsException implements Exception {
+  final String message;
+  final double required;
+  final double available;
+  InsufficientFundsException(
+    this.message, {
+    required this.required,
+    required this.available,
+  });
+
+  @override
+  String toString() =>
+      'InsufficientFundsException: $message (Required: $required, Available: $available)';
+}
 
 class Web3Service {
   static const String _privateKeyKey = 'wallet_private_key';
   static const String _addressKey = 'wallet_address';
+  static const String _networkStatusKey = 'network_status';
 
   late Web3Client _client;
   late Credentials _credentials;
@@ -15,6 +58,14 @@ class Web3Service {
 
   bool _isInitialized = false;
   String? _walletAddress;
+  bool _isConnected = false;
+  DateTime? _lastConnectionCheck;
+
+  // Connection management
+  static const int _maxRetries = 3;
+  static const Duration _retryDelay = Duration(seconds: 2);
+  static const Duration _connectionTimeout = Duration(seconds: 10);
+  static const Duration _connectionCheckInterval = Duration(minutes: 5);
 
   // Supra blockchain configuration
   static const String _rpcUrl = 'https://rpc-testnet.supra.com'; // Testnet RPC
@@ -43,10 +94,95 @@ class Web3Service {
         _walletAddress = address;
       }
 
+      // Test network connection
+      await _checkNetworkConnection();
+
       _isInitialized = true;
     } catch (e) {
-      throw Exception('Failed to initialize Web3 service: $e');
+      throw Web3Exception('Failed to initialize Web3 service: $e');
     }
+  }
+
+  /// Check network connection with retry mechanism
+  Future<bool> _checkNetworkConnection() async {
+    for (int attempt = 0; attempt < _maxRetries; attempt++) {
+      try {
+        final client = http.Client();
+        final response = await client
+            .post(
+              Uri.parse(_rpcUrl),
+              headers: {'Content-Type': 'application/json'},
+              body: json.encode({
+                'jsonrpc': '2.0',
+                'method': 'eth_blockNumber',
+                'params': [],
+                'id': 1,
+              }),
+            )
+            .timeout(_connectionTimeout);
+
+        client.close();
+
+        if (response.statusCode == 200) {
+          final data = json.decode(response.body);
+          if (data['result'] != null) {
+            _isConnected = true;
+            _lastConnectionCheck = DateTime.now();
+            await _secureStorage.write(
+              key: _networkStatusKey,
+              value: json.encode({
+                'connected': true,
+                'lastCheck': DateTime.now().toIso8601String(),
+                'blockNumber': data['result'],
+              }),
+            );
+            return true;
+          }
+        }
+      } catch (e) {
+        if (attempt == _maxRetries - 1) {
+          _isConnected = false;
+          await _secureStorage.write(
+            key: _networkStatusKey,
+            value: json.encode({
+              'connected': false,
+              'lastCheck': DateTime.now().toIso8601String(),
+              'error': e.toString(),
+            }),
+          );
+          throw NetworkException(
+            'Failed to connect to Supra network after $_maxRetries attempts: $e',
+          );
+        }
+        await Future.delayed(_retryDelay);
+      }
+    }
+    return false;
+  }
+
+  /// Get current network status
+  Future<Map<String, dynamic>> getNetworkStatus() async {
+    try {
+      // Check if we need to refresh connection status
+      if (_lastConnectionCheck == null ||
+          DateTime.now().difference(_lastConnectionCheck!) >
+              _connectionCheckInterval) {
+        await _checkNetworkConnection();
+      }
+
+      final statusData = await _secureStorage.read(key: _networkStatusKey);
+      if (statusData != null) {
+        return json.decode(statusData);
+      }
+    } catch (e) {
+      // Return offline status if check fails
+    }
+
+    return {
+      'connected': false,
+      'lastCheck': DateTime.now().toIso8601String(),
+      'error': 'Unable to determine network status',
+    };
   }
 
   Future<String> createWallet() async {
@@ -82,17 +218,39 @@ class Web3Service {
   }
 
   Future<double> getBalance() async {
-    if (_walletAddress == null) return 0.0;
+    if (_walletAddress == null) {
+      throw Web3Exception('Wallet not connected');
+    }
 
     try {
+      // Ensure network connection
+      await _ensureNetworkConnection();
+
       final address = EthereumAddress.fromHex(_walletAddress!);
       final balance = await _client.getBalance(address);
 
       // Convert from Wei to Ether (or SUPRA tokens)
       return balance.getValueInUnit(EtherUnit.ether).toDouble();
     } catch (e) {
-      // Return mock balance for development
+      if (e is Web3Exception || e is NetworkException) {
+        rethrow;
+      }
+      // Return mock balance for development if real balance fails
       return 1.5; // Mock balance
+    }
+  }
+
+  /// Ensure network connection is available
+  Future<void> _ensureNetworkConnection() async {
+    if (!_isConnected ||
+        _lastConnectionCheck == null ||
+        DateTime.now().difference(_lastConnectionCheck!) >
+            _connectionCheckInterval) {
+      await _checkNetworkConnection();
+    }
+
+    if (!_isConnected) {
+      throw NetworkException('No network connection available');
     }
   }
 
@@ -114,14 +272,17 @@ class Web3Service {
     required String projectContractAddress,
   }) async {
     if (_walletAddress == null || !_isInitialized) {
-      throw Exception('Wallet not connected');
+      throw Web3Exception('Wallet not connected');
     }
 
     try {
       // Validate investment amount
       if (amount <= 0) {
-        throw Exception('Investment amount must be greater than 0');
+        throw TransactionException('Investment amount must be greater than 0');
       }
+
+      // Ensure network connection
+      await _ensureNetworkConnection();
 
       // Check wallet balance
       final balance = await getBalance();
@@ -129,8 +290,10 @@ class Web3Service {
       final totalRequired = amount + estimatedGasFee;
 
       if (balance < totalRequired) {
-        throw Exception(
-          'Insufficient balance. Required: $totalRequired, Available: $balance',
+        throw InsufficientFundsException(
+          'Insufficient balance for investment',
+          required: totalRequired,
+          available: balance,
         );
       }
 
@@ -151,7 +314,13 @@ class Web3Service {
 
       return transactionHash;
     } catch (e) {
-      throw Exception('Investment transaction failed: $e');
+      if (e is Web3Exception ||
+          e is NetworkException ||
+          e is TransactionException ||
+          e is InsufficientFundsException) {
+        rethrow;
+      }
+      throw TransactionException('Investment transaction failed: $e');
     }
   }
 
@@ -229,7 +398,8 @@ class Web3Service {
       );
     } catch (e) {
       // Non-critical error, don't fail the transaction
-      print('Warning: Failed to store transaction locally: $e');
+      // In production, use proper logging framework
+      // Logger.warning('Failed to store transaction locally: $e');
     }
   }
 
