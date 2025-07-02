@@ -22,6 +22,14 @@ abstract class WalletRemoteDataSource {
   });
   Future<TransactionModel> getTransactionStatus(String transactionHash);
   Future<List<InvestmentModel>> getInvestments();
+  Future<WalletModel> importWallet({
+    required String privateKey,
+    String? mnemonic,
+  });
+  Future<WalletModel> connectExternalWallet({
+    required String address,
+    String? privateKey,
+  });
 }
 
 class WalletRemoteDataSourceImpl implements WalletRemoteDataSource {
@@ -159,5 +167,75 @@ class WalletRemoteDataSourceImpl implements WalletRemoteDataSource {
         transactions: [],
       ),
     ];
+  }
+
+  @override
+  Future<WalletModel> importWallet({
+    required String privateKey,
+    String? mnemonic,
+  }) async {
+    try {
+      // Initialize Web3 service with imported credentials
+      await web3Service.initialize();
+
+      // Import wallet using private key
+      final success = await web3Service.importWallet(privateKey);
+
+      if (!success) {
+        throw Exception('Failed to import wallet with provided private key');
+      }
+
+      // Get wallet information after successful import
+      final address = await web3Service.getWalletAddress();
+      final balance = await web3Service.getBalance();
+      final blockvestBalance = await web3Service.getBlockvestTokenBalance();
+      final transactionHistory = await getTransactionHistory();
+
+      return WalletModel(
+        address: address ?? '',
+        balance: balance,
+        blockvestBalance: blockvestBalance,
+        isConnected: true,
+        transactions: transactionHistory,
+      );
+    } catch (e) {
+      throw Exception('Failed to import wallet: ${e.toString()}');
+    }
+  }
+
+  @override
+  Future<WalletModel> connectExternalWallet({
+    required String address,
+    String? privateKey,
+  }) async {
+    try {
+      // Initialize Web3 service
+      await web3Service.initialize();
+
+      // Connect to external wallet
+      final success = await web3Service.connectExternalWallet(
+        address: address,
+        privateKey: privateKey,
+      );
+
+      if (!success) {
+        throw Exception('Failed to connect to external wallet');
+      }
+
+      // Get wallet information after successful connection
+      final balance = await web3Service.getBalance();
+      final blockvestBalance = await web3Service.getBlockvestTokenBalance();
+      final transactionHistory = await getTransactionHistory();
+
+      return WalletModel(
+        address: address,
+        balance: balance,
+        blockvestBalance: blockvestBalance,
+        isConnected: true,
+        transactions: transactionHistory,
+      );
+    } catch (e) {
+      throw Exception('Failed to connect external wallet: ${e.toString()}');
+    }
   }
 }

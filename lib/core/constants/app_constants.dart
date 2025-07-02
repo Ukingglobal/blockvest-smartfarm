@@ -4,10 +4,10 @@ class AppConstants {
   static const String appVersion = '1.0.0';
   static const String appDescription = 'Agricultural Investment Platform';
 
-  // API Configuration (Placeholder for MVP)
-  static const String supabaseUrl = 'https://placeholder.supabase.co';
+  // API Configuration - BlockVest SmartFarm Project
+  static const String supabaseUrl = 'https://jeyhruxdhnmagknfcqng.supabase.co';
   static const String supabaseAnonKey =
-      'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBsYWNlaG9sZGVyIiwicm9sZSI6ImFub24iLCJpYXQiOjE2NDUxOTI4MDAsImV4cCI6MTk2MDc2ODgwMH0.placeholder';
+      'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImpleWhydXhkaG5tYWdrbmZjcW5nIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTE0MTA3MTUsImV4cCI6MjA2Njk4NjcxNX0.X7hBDjCCBKMuM97105VBcaVtBbrEwdnmz7n9ATcPNC0';
 
   // Token Information
   static const String tokenName = 'BLOCKVEST';

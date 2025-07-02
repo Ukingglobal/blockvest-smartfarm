@@ -7,6 +7,8 @@ import 'package:connectivity_plus/connectivity_plus.dart';
 import '../network/network_info.dart';
 import '../constants/app_constants.dart';
 import '../services/web3_service.dart';
+import '../services/portfolio_service.dart';
+import '../services/smart_contract_service.dart';
 import '../../features/wallet/domain/repositories/wallet_repository.dart';
 import '../../features/wallet/data/repositories/wallet_repository_impl.dart';
 import '../../features/wallet/data/datasources/wallet_remote_data_source.dart';
@@ -33,6 +35,8 @@ Future<void> init() async {
   // Core
   sl.registerLazySingleton<NetworkInfo>(() => NetworkInfoImpl());
   sl.registerLazySingleton(() => Web3Service());
+  sl.registerLazySingleton(() => PortfolioService());
+  sl.registerLazySingleton(() => SmartContractService());
 
   // Data sources
   sl.registerLazySingleton<WalletRemoteDataSource>(

@@ -14,6 +14,7 @@ class WalletBloc extends Bloc<WalletEvent, WalletState> {
     on<RefreshBalanceEvent>(_onRefreshBalance);
     on<LoadTransactionHistoryEvent>(_onLoadTransactionHistory);
     on<LoadInvestmentsEvent>(_onLoadInvestments);
+    on<ImportWalletEvent>(_onImportWallet);
   }
 
   Future<void> _onLoadWallet(
@@ -24,7 +25,7 @@ class WalletBloc extends Bloc<WalletEvent, WalletState> {
 
     try {
       final walletResult = await walletRepository.getWallet();
-      
+
       await walletResult.fold(
         (failure) async {
           emit(const WalletDisconnected());
@@ -37,33 +38,37 @@ class WalletBloc extends Bloc<WalletEvent, WalletState> {
 
           // Load investments
           final investmentsResult = await walletRepository.getInvestments();
-          
+
           await investmentsResult.fold(
             (failure) async {
-              emit(WalletLoaded(
-                wallet: wallet,
-                investments: [],
-                totalInvestmentValue: 0.0,
-                totalProfitLoss: 0.0,
-              ));
+              emit(
+                WalletLoaded(
+                  wallet: wallet,
+                  investments: [],
+                  totalInvestmentValue: 0.0,
+                  totalProfitLoss: 0.0,
+                ),
+              );
             },
             (investments) async {
               final totalInvestmentValue = investments.fold<double>(
                 0.0,
                 (sum, investment) => sum + investment.currentValue,
               );
-              
+
               final totalProfitLoss = investments.fold<double>(
                 0.0,
                 (sum, investment) => sum + investment.profitLoss,
               );
 
-              emit(WalletLoaded(
-                wallet: wallet,
-                investments: investments,
-                totalInvestmentValue: totalInvestmentValue,
-                totalProfitLoss: totalProfitLoss,
-              ));
+              emit(
+                WalletLoaded(
+                  wallet: wallet,
+                  investments: investments,
+                  totalInvestmentValue: totalInvestmentValue,
+                  totalProfitLoss: totalProfitLoss,
+                ),
+              );
             },
           );
         },
@@ -81,7 +86,7 @@ class WalletBloc extends Bloc<WalletEvent, WalletState> {
 
     try {
       final result = await walletRepository.connectWallet();
-      
+
       await result.fold(
         (failure) async {
           emit(const WalletError(message: 'Failed to connect wallet'));
@@ -104,7 +109,7 @@ class WalletBloc extends Bloc<WalletEvent, WalletState> {
 
     try {
       final result = await walletRepository.createWallet();
-      
+
       await result.fold(
         (failure) async {
           emit(const WalletError(message: 'Failed to create wallet'));
@@ -128,7 +133,9 @@ class WalletBloc extends Bloc<WalletEvent, WalletState> {
       await walletRepository.disconnectWallet();
       emit(const WalletDisconnected());
     } catch (e) {
-      emit(WalletError(message: 'Failed to disconnect wallet: ${e.toString()}'));
+      emit(
+        WalletError(message: 'Failed to disconnect wallet: ${e.toString()}'),
+      );
     }
   }
 
@@ -138,11 +145,12 @@ class WalletBloc extends Bloc<WalletEvent, WalletState> {
   ) async {
     if (state is WalletLoaded) {
       final currentState = state as WalletLoaded;
-      
+
       try {
         final balanceResult = await walletRepository.getBalance();
-        final blockvestBalanceResult = await walletRepository.getBlockvestBalance();
-        
+        final blockvestBalanceResult = await walletRepository
+            .getBlockvestBalance();
+
         await balanceResult.fold(
           (failure) async {
             // Keep current state if balance refresh fails
@@ -158,12 +166,14 @@ class WalletBloc extends Bloc<WalletEvent, WalletState> {
                   blockvestBalance: blockvestBalance,
                 );
 
-                emit(WalletLoaded(
-                  wallet: updatedWallet,
-                  investments: currentState.investments,
-                  totalInvestmentValue: currentState.totalInvestmentValue,
-                  totalProfitLoss: currentState.totalProfitLoss,
-                ));
+                emit(
+                  WalletLoaded(
+                    wallet: updatedWallet,
+                    investments: currentState.investments,
+                    totalInvestmentValue: currentState.totalInvestmentValue,
+                    totalProfitLoss: currentState.totalProfitLoss,
+                  ),
+                );
               },
             );
           },
@@ -180,10 +190,10 @@ class WalletBloc extends Bloc<WalletEvent, WalletState> {
   ) async {
     if (state is WalletLoaded) {
       final currentState = state as WalletLoaded;
-      
+
       try {
         final result = await walletRepository.getTransactionHistory();
-        
+
         await result.fold(
           (failure) async {
             // Keep current state if loading fails
@@ -193,12 +203,14 @@ class WalletBloc extends Bloc<WalletEvent, WalletState> {
               transactions: transactions,
             );
 
-            emit(WalletLoaded(
-              wallet: updatedWallet,
-              investments: currentState.investments,
-              totalInvestmentValue: currentState.totalInvestmentValue,
-              totalProfitLoss: currentState.totalProfitLoss,
-            ));
+            emit(
+              WalletLoaded(
+                wallet: updatedWallet,
+                investments: currentState.investments,
+                totalInvestmentValue: currentState.totalInvestmentValue,
+                totalProfitLoss: currentState.totalProfitLoss,
+              ),
+            );
           },
         );
       } catch (e) {
@@ -213,10 +225,10 @@ class WalletBloc extends Bloc<WalletEvent, WalletState> {
   ) async {
     if (state is WalletLoaded) {
       final currentState = state as WalletLoaded;
-      
+
       try {
         final result = await walletRepository.getInvestments();
-        
+
         await result.fold(
           (failure) async {
             // Keep current state if loading fails
@@ -226,23 +238,59 @@ class WalletBloc extends Bloc<WalletEvent, WalletState> {
               0.0,
               (sum, investment) => sum + investment.currentValue,
             );
-            
+
             final totalProfitLoss = investments.fold<double>(
               0.0,
               (sum, investment) => sum + investment.profitLoss,
             );
 
-            emit(WalletLoaded(
-              wallet: currentState.wallet,
-              investments: investments,
-              totalInvestmentValue: totalInvestmentValue,
-              totalProfitLoss: totalProfitLoss,
-            ));
+            emit(
+              WalletLoaded(
+                wallet: currentState.wallet,
+                investments: investments,
+                totalInvestmentValue: totalInvestmentValue,
+                totalProfitLoss: totalProfitLoss,
+              ),
+            );
           },
         );
       } catch (e) {
         // Keep current state if loading fails
       }
+    }
+  }
+
+  Future<void> _onImportWallet(
+    ImportWalletEvent event,
+    Emitter<WalletState> emit,
+  ) async {
+    emit(const WalletLoading());
+
+    try {
+      final result = await walletRepository.importWallet(
+        privateKey: event.privateKey,
+        mnemonic: event.mnemonic,
+      );
+
+      await result.fold(
+        (failure) async {
+          emit(WalletError(message: failure.message));
+        },
+        (wallet) async {
+          emit(
+            WalletLoaded(
+              wallet: wallet,
+              investments: [],
+              totalInvestmentValue: 0.0,
+              totalProfitLoss: 0.0,
+            ),
+          );
+          // Load wallet data after successful import
+          add(const LoadWalletEvent());
+        },
+      );
+    } catch (e) {
+      emit(WalletError(message: 'Failed to import wallet: ${e.toString()}'));
     }
   }
 }

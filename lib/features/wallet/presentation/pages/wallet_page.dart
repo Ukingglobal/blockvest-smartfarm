@@ -10,6 +10,7 @@ import '../widgets/wallet_balance_card.dart';
 import '../widgets/wallet_actions_row.dart';
 import '../widgets/transaction_history_list.dart';
 import '../widgets/portfolio_overview.dart';
+import '../widgets/wallet_connection_status.dart';
 import '../../domain/repositories/wallet_repository.dart';
 
 class WalletPage extends StatefulWidget {
@@ -79,6 +80,10 @@ class _WalletPageState extends State<WalletPage>
         ),
         body: BlocBuilder<WalletBloc, WalletState>(
           builder: (context, state) {
+            if (state is WalletDisconnected) {
+              return const WalletConnectionStatus();
+            }
+
             if (state is WalletLoading) {
               return const Center(child: CircularProgressIndicator());
             }
@@ -136,6 +141,8 @@ class _WalletPageState extends State<WalletPage>
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
+          const WalletConnectionStatus(),
+          const SizedBox(height: 16),
           WalletBalanceCard(wallet: state.wallet),
           const SizedBox(height: 16),
           WalletActionsRow(

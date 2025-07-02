@@ -1,6 +1,8 @@
 import 'package:dartz/dartz.dart';
 import '../../../../core/error/failures.dart';
 import '../../../../core/error/exceptions.dart';
+import '../../../../core/services/portfolio_service.dart';
+import '../../../../core/services/smart_contract_service.dart';
 import '../../domain/entities/wallet.dart';
 import '../../domain/repositories/wallet_repository.dart';
 import '../datasources/wallet_remote_data_source.dart';
@@ -155,6 +157,44 @@ class WalletRepositoryImpl implements WalletRepository {
       return Left(ServerFailure('Failed to get investments'));
     } catch (e) {
       return Left(ServerFailure('Failed to get investments'));
+    }
+  }
+
+  @override
+  Future<Either<Failure, Wallet>> importWallet({
+    required String privateKey,
+    String? mnemonic,
+  }) async {
+    try {
+      final wallet = await remoteDataSource.importWallet(
+        privateKey: privateKey,
+        mnemonic: mnemonic,
+      );
+      return Right(wallet);
+    } on ServerException {
+      return Left(ServerFailure('Failed to import wallet'));
+    } catch (e) {
+      return Left(ServerFailure('Failed to import wallet: ${e.toString()}'));
+    }
+  }
+
+  @override
+  Future<Either<Failure, Wallet>> connectExternalWallet({
+    required String address,
+    String? privateKey,
+  }) async {
+    try {
+      final wallet = await remoteDataSource.connectExternalWallet(
+        address: address,
+        privateKey: privateKey,
+      );
+      return Right(wallet);
+    } on ServerException {
+      return Left(ServerFailure('Failed to connect external wallet'));
+    } catch (e) {
+      return Left(
+        ServerFailure('Failed to connect external wallet: ${e.toString()}'),
+      );
     }
   }
 }

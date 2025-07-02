@@ -18,6 +18,16 @@ abstract class WalletRepository {
     required String projectId,
     required double amount,
   });
-  Future<Either<Failure, Transaction>> getTransactionStatus(String transactionHash);
+  Future<Either<Failure, Transaction>> getTransactionStatus(
+    String transactionHash,
+  );
   Future<Either<Failure, List<Investment>>> getInvestments();
+  Future<Either<Failure, Wallet>> importWallet({
+    required String privateKey,
+    String? mnemonic,
+  });
+  Future<Either<Failure, Wallet>> connectExternalWallet({
+    required String address,
+    String? privateKey,
+  });
 }

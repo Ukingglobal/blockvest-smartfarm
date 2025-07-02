@@ -12,7 +12,13 @@ class LoadWalletEvent extends WalletEvent {
 }
 
 class ConnectWalletEvent extends WalletEvent {
-  const ConnectWalletEvent();
+  final String address;
+  final String? privateKey;
+
+  const ConnectWalletEvent({required this.address, this.privateKey});
+
+  @override
+  List<Object?> get props => [address, privateKey];
 }
 
 class CreateWalletEvent extends WalletEvent {
@@ -33,4 +39,14 @@ class LoadTransactionHistoryEvent extends WalletEvent {
 
 class LoadInvestmentsEvent extends WalletEvent {
   const LoadInvestmentsEvent();
+}
+
+class ImportWalletEvent extends WalletEvent {
+  final String privateKey;
+  final String? mnemonic;
+
+  const ImportWalletEvent({required this.privateKey, this.mnemonic});
+
+  @override
+  List<Object?> get props => [privateKey, mnemonic];
 }

@@ -6,10 +6,7 @@ import '../bloc/investment_state.dart';
 class InvestmentSuccessDialog extends StatelessWidget {
   final InvestmentSuccess state;
 
-  const InvestmentSuccessDialog({
-    super.key,
-    required this.state,
-  });
+  const InvestmentSuccessDialog({super.key, required this.state});
 
   void _copyTransactionHash(BuildContext context) {
     Clipboard.setData(ClipboardData(text: state.transactionHash));
@@ -21,12 +18,18 @@ class InvestmentSuccessDialog extends StatelessWidget {
     );
   }
 
+  void _navigateToPortfolio(BuildContext context) {
+    // Navigate to wallet page with portfolio tab
+    Navigator.of(context).pushNamedAndRemoveUntil(
+      '/wallet',
+      (route) => route.settings.name == '/dashboard',
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Dialog(
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(20),
-      ),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
       child: Padding(
         padding: const EdgeInsets.all(24),
         child: Column(
@@ -47,7 +50,7 @@ class InvestmentSuccessDialog extends StatelessWidget {
               ),
             ),
             const SizedBox(height: 20),
-            
+
             // Title
             Text(
               'Investment Successful!',
@@ -57,17 +60,17 @@ class InvestmentSuccessDialog extends StatelessWidget {
               ),
             ),
             const SizedBox(height: 8),
-            
+
             // Subtitle
             Text(
               'Your investment has been confirmed on the blockchain',
-              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                color: Colors.grey[600],
-              ),
+              style: Theme.of(
+                context,
+              ).textTheme.bodyMedium?.copyWith(color: Colors.grey[600]),
               textAlign: TextAlign.center,
             ),
             const SizedBox(height: 24),
-            
+
             // Investment summary
             Container(
               padding: const EdgeInsets.all(16),
@@ -98,13 +101,15 @@ class InvestmentSuccessDialog extends StatelessWidget {
                   const SizedBox(height: 8),
                   _buildSummaryRow(
                     'Date',
-                    DateFormat('MMM dd, yyyy • HH:mm').format(state.transaction.timestamp),
+                    DateFormat(
+                      'MMM dd, yyyy • HH:mm',
+                    ).format(state.transaction.timestamp),
                   ),
                 ],
               ),
             ),
             const SizedBox(height: 24),
-            
+
             // Success message
             Container(
               padding: const EdgeInsets.all(12),
@@ -124,17 +129,14 @@ class InvestmentSuccessDialog extends StatelessWidget {
                   Expanded(
                     child: Text(
                       'You can track your investment progress in the Portfolio section.',
-                      style: TextStyle(
-                        color: Colors.blue[700],
-                        fontSize: 12,
-                      ),
+                      style: TextStyle(color: Colors.blue[700], fontSize: 12),
                     ),
                   ),
                 ],
               ),
             ),
             const SizedBox(height: 24),
-            
+
             // Action buttons
             Column(
               children: [
@@ -143,7 +145,7 @@ class InvestmentSuccessDialog extends StatelessWidget {
                   child: ElevatedButton(
                     onPressed: () {
                       Navigator.of(context).pop(); // Close dialog
-                      // Navigate to portfolio (you can implement this navigation)
+                      _navigateToPortfolio(context);
                     },
                     style: ElevatedButton.styleFrom(
                       backgroundColor: Colors.green,
@@ -187,13 +189,7 @@ class InvestmentSuccessDialog extends StatelessWidget {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
-        Text(
-          label,
-          style: TextStyle(
-            color: Colors.grey[700],
-            fontSize: 14,
-          ),
-        ),
+        Text(label, style: TextStyle(color: Colors.grey[700], fontSize: 14)),
         Row(
           children: [
             Text(
@@ -209,11 +205,7 @@ class InvestmentSuccessDialog extends StatelessWidget {
               const SizedBox(width: 4),
               GestureDetector(
                 onTap: onCopy,
-                child: Icon(
-                  Icons.copy,
-                  size: 16,
-                  color: Colors.grey[600],
-                ),
+                child: Icon(Icons.copy, size: 16, color: Colors.grey[600]),
               ),
             ],
           ],

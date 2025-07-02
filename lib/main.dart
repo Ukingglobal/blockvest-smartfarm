@@ -31,6 +31,7 @@ class BlockVestApp extends StatelessWidget {
       ],
       child: MaterialApp.router(
         title: 'BlockVest',
+        debugShowCheckedModeBanner: false,
         theme: AppTheme.lightTheme,
         darkTheme: AppTheme.darkTheme,
         themeMode: ThemeMode.system,
