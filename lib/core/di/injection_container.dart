@@ -12,6 +12,7 @@ import '../services/smart_contract_service.dart';
 import '../services/biometric_service.dart';
 import '../services/kyc_service.dart';
 import '../services/mfa_service.dart';
+import '../services/settings_service.dart';
 import '../../features/wallet/domain/repositories/wallet_repository.dart';
 import '../../features/wallet/data/repositories/wallet_repository_impl.dart';
 import '../../features/wallet/data/datasources/wallet_remote_data_source.dart';
@@ -45,6 +46,9 @@ Future<void> init() async {
   sl.registerLazySingleton(() => BiometricService());
   sl.registerLazySingleton(() => KYCService());
   sl.registerLazySingleton(() => MFAService());
+
+  // Settings Service
+  sl.registerLazySingleton(() => SettingsService()..initialize());
 
   // Data sources
   sl.registerLazySingleton<WalletRemoteDataSource>(
