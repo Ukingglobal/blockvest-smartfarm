@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 
 import '../../../auth/presentation/bloc/auth_bloc.dart';
 import '../../../../core/router/app_router.dart';
+import '../../../../shared/widgets/widgets.dart';
 
 class DashboardPage extends StatelessWidget {
   const DashboardPage({super.key});
@@ -11,35 +12,12 @@ class DashboardPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Dashboard'),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.notifications_outlined),
-            onPressed: () {
-              // TODO: Navigate to notifications
-            },
-          ),
-          PopupMenuButton<String>(
-            onSelected: (value) {
-              if (value == 'profile') {
-                context.go(AppRouter.settings);
-              } else if (value == 'logout') {
-                context.read<AuthBloc>().add(const SignOutRequested());
-              }
-            },
-            itemBuilder: (context) => [
-              const PopupMenuItem(
-                value: 'profile',
-                child: Text('Profile & Settings'),
-              ),
-              const PopupMenuItem(
-                value: 'logout',
-                child: Text('Logout'),
-              ),
-            ],
-          ),
-        ],
+      appBar: DashboardAppBar(
+        title: 'Dashboard',
+        onNotificationTap: () {
+          // TODO: Navigate to notifications
+        },
+        onProfileTap: () => _showProfileMenu(context),
       ),
       body: BlocListener<AuthBloc, AuthState>(
         listener: (context, state) {
@@ -63,7 +41,9 @@ class DashboardPage extends StatelessWidget {
                           children: [
                             CircleAvatar(
                               radius: 30,
-                              backgroundColor: Theme.of(context).colorScheme.primary,
+                              backgroundColor: Theme.of(
+                                context,
+                              ).colorScheme.primary,
                               child: Text(
                                 state.user.fullName.isNotEmpty
                                     ? state.user.fullName[0].toUpperCase()
@@ -82,20 +62,30 @@ class DashboardPage extends StatelessWidget {
                                 children: [
                                   Text(
                                     'Welcome back,',
-                                    style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                                          color: Theme.of(context).colorScheme.onSurface.withOpacity(0.7),
+                                    style: Theme.of(context)
+                                        .textTheme
+                                        .bodyMedium
+                                        ?.copyWith(
+                                          color: Theme.of(context)
+                                              .colorScheme
+                                              .onSurface
+                                              .withOpacity(0.7),
                                         ),
                                   ),
                                   Text(
                                     state.user.fullName,
-                                    style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                                          fontWeight: FontWeight.bold,
-                                        ),
+                                    style: Theme.of(context)
+                                        .textTheme
+                                        .titleLarge
+                                        ?.copyWith(fontWeight: FontWeight.bold),
                                   ),
                                   if (!state.user.isKycVerified)
                                     Container(
                                       margin: const EdgeInsets.only(top: 4),
-                                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                                      padding: const EdgeInsets.symmetric(
+                                        horizontal: 8,
+                                        vertical: 2,
+                                      ),
                                       decoration: BoxDecoration(
                                         color: Colors.orange.withOpacity(0.2),
                                         borderRadius: BorderRadius.circular(12),
@@ -121,7 +111,7 @@ class DashboardPage extends StatelessWidget {
                 },
               ),
               const SizedBox(height: 16),
-              
+
               // Portfolio overview
               Card(
                 child: Padding(
@@ -132,29 +122,27 @@ class DashboardPage extends StatelessWidget {
                       Text(
                         'Portfolio Overview',
                         style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                              fontWeight: FontWeight.bold,
-                            ),
+                          fontWeight: FontWeight.bold,
+                        ),
                       ),
                       const SizedBox(height: 16),
                       Row(
                         children: [
                           Expanded(
-                            child: _buildStatCard(
-                              context,
-                              'Total Investment',
-                              '₦0.00',
-                              Icons.account_balance_wallet,
-                              Colors.green,
+                            child: StatCard(
+                              title: 'Total Investment',
+                              value: '₦0.00',
+                              icon: Icons.account_balance_wallet,
+                              valueColor: Colors.green,
                             ),
                           ),
                           const SizedBox(width: 12),
                           Expanded(
-                            child: _buildStatCard(
-                              context,
-                              'Total Returns',
-                              '₦0.00',
-                              Icons.trending_up,
-                              Colors.blue,
+                            child: StatCard(
+                              title: 'Total Returns',
+                              value: '₦0.00',
+                              icon: Icons.trending_up,
+                              valueColor: Colors.blue,
                             ),
                           ),
                         ],
@@ -163,22 +151,20 @@ class DashboardPage extends StatelessWidget {
                       Row(
                         children: [
                           Expanded(
-                            child: _buildStatCard(
-                              context,
-                              'Active Projects',
-                              '0',
-                              Icons.agriculture,
-                              Colors.orange,
+                            child: StatCard(
+                              title: 'Active Projects',
+                              value: '0',
+                              icon: Icons.agriculture,
+                              valueColor: Colors.orange,
                             ),
                           ),
                           const SizedBox(width: 12),
                           Expanded(
-                            child: _buildStatCard(
-                              context,
-                              '\$BLOCKVEST',
-                              '0.00',
-                              Icons.currency_bitcoin,
-                              Colors.purple,
+                            child: StatCard(
+                              title: '\$BLOCKVEST',
+                              value: '0.00',
+                              icon: Icons.currency_bitcoin,
+                              valueColor: Colors.purple,
                             ),
                           ),
                         ],
@@ -188,32 +174,30 @@ class DashboardPage extends StatelessWidget {
                 ),
               ),
               const SizedBox(height: 16),
-              
+
               // Quick actions
               Text(
                 'Quick Actions',
-                style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                      fontWeight: FontWeight.bold,
-                    ),
+                style: Theme.of(
+                  context,
+                ).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
               ),
               const SizedBox(height: 12),
               Row(
                 children: [
                   Expanded(
-                    child: _buildActionCard(
-                      context,
-                      'Browse Projects',
-                      Icons.search,
-                      () => context.go(AppRouter.marketplace),
+                    child: SecondaryButton(
+                      text: 'Browse Projects',
+                      icon: Icons.search,
+                      onPressed: () => context.go(AppRouter.marketplace),
                     ),
                   ),
                   const SizedBox(width: 12),
                   Expanded(
-                    child: _buildActionCard(
-                      context,
-                      'My Wallet',
-                      Icons.account_balance_wallet,
-                      () => context.go(AppRouter.wallet),
+                    child: SecondaryButton(
+                      text: 'My Wallet',
+                      icon: Icons.account_balance_wallet,
+                      onPressed: () => context.go(AppRouter.wallet),
                     ),
                   ),
                 ],
@@ -222,20 +206,18 @@ class DashboardPage extends StatelessWidget {
               Row(
                 children: [
                   Expanded(
-                    child: _buildActionCard(
-                      context,
-                      'Governance',
-                      Icons.how_to_vote,
-                      () => context.go(AppRouter.governance),
+                    child: TertiaryButton(
+                      text: 'Governance',
+                      icon: Icons.how_to_vote,
+                      onPressed: () => context.go(AppRouter.governance),
                     ),
                   ),
                   const SizedBox(width: 12),
                   Expanded(
-                    child: _buildActionCard(
-                      context,
-                      'Settings',
-                      Icons.settings,
-                      () => context.go(AppRouter.settings),
+                    child: TertiaryButton(
+                      text: 'Settings',
+                      icon: Icons.settings,
+                      onPressed: () => context.go(AppRouter.settings),
                     ),
                   ),
                 ],
@@ -247,79 +229,29 @@ class DashboardPage extends StatelessWidget {
     );
   }
 
-  Widget _buildStatCard(
-    BuildContext context,
-    String title,
-    String value,
-    IconData icon,
-    Color color,
-  ) {
-    return Container(
-      padding: const EdgeInsets.all(12),
-      decoration: BoxDecoration(
-        color: color.withOpacity(0.1),
-        borderRadius: BorderRadius.circular(8),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            children: [
-              Icon(icon, color: color, size: 20),
-              const SizedBox(width: 8),
-              Expanded(
-                child: Text(
-                  title,
-                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                        color: Theme.of(context).colorScheme.onSurface.withOpacity(0.7),
-                      ),
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 4),
-          Text(
-            value,
-            style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                  fontWeight: FontWeight.bold,
-                ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildActionCard(
-    BuildContext context,
-    String title,
-    IconData icon,
-    VoidCallback onTap,
-  ) {
-    return InkWell(
-      onTap: onTap,
-      borderRadius: BorderRadius.circular(8),
-      child: Container(
+  void _showProfileMenu(BuildContext context) {
+    showModalBottomSheet(
+      context: context,
+      builder: (context) => Container(
         padding: const EdgeInsets.all(16),
-        decoration: BoxDecoration(
-          border: Border.all(
-            color: Theme.of(context).colorScheme.outline.withOpacity(0.2),
-          ),
-          borderRadius: BorderRadius.circular(8),
-        ),
         child: Column(
+          mainAxisSize: MainAxisSize.min,
           children: [
-            Icon(
-              icon,
-              size: 32,
-              color: Theme.of(context).colorScheme.primary,
+            ListTile(
+              leading: const Icon(Icons.person_outline),
+              title: const Text('Profile & Settings'),
+              onTap: () {
+                Navigator.pop(context);
+                context.go(AppRouter.settings);
+              },
             ),
-            const SizedBox(height: 8),
-            Text(
-              title,
-              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                    fontWeight: FontWeight.w500,
-                  ),
-              textAlign: TextAlign.center,
+            ListTile(
+              leading: const Icon(Icons.logout),
+              title: const Text('Logout'),
+              onTap: () {
+                Navigator.pop(context);
+                context.read<AuthBloc>().add(const SignOutRequested());
+              },
             ),
           ],
         ),

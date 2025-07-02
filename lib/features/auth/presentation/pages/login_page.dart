@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 
 import '../bloc/auth_bloc.dart';
 import '../../../../core/router/app_router.dart';
+import '../../../../shared/widgets/widgets.dart';
 
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
@@ -28,11 +29,11 @@ class _LoginPageState extends State<LoginPage> {
   void _signIn() {
     if (_formKey.currentState!.validate()) {
       context.read<AuthBloc>().add(
-            SignInRequested(
-              email: _emailController.text.trim(),
-              password: _passwordController.text,
-            ),
-          );
+        SignInRequested(
+          email: _emailController.text.trim(),
+          password: _passwordController.text,
+        ),
+      );
     }
   }
 
@@ -71,21 +72,23 @@ class _LoginPageState extends State<LoginPage> {
                   Text(
                     'BlockVest',
                     style: Theme.of(context).textTheme.headlineMedium?.copyWith(
-                          fontWeight: FontWeight.bold,
-                          color: Theme.of(context).colorScheme.primary,
-                        ),
+                      fontWeight: FontWeight.bold,
+                      color: Theme.of(context).colorScheme.primary,
+                    ),
                     textAlign: TextAlign.center,
                   ),
                   const SizedBox(height: 8),
                   Text(
                     'Welcome back! Sign in to continue',
                     style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                          color: Theme.of(context).colorScheme.onSurface.withOpacity(0.7),
-                        ),
+                      color: Theme.of(
+                        context,
+                      ).colorScheme.onSurface.withValues(alpha: 0.7),
+                    ),
                     textAlign: TextAlign.center,
                   ),
                   const SizedBox(height: 48),
-                  
+
                   // Email field
                   TextFormField(
                     controller: _emailController,
@@ -98,14 +101,16 @@ class _LoginPageState extends State<LoginPage> {
                       if (value == null || value.isEmpty) {
                         return 'Please enter your email';
                       }
-                      if (!RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$').hasMatch(value)) {
+                      if (!RegExp(
+                        r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$',
+                      ).hasMatch(value)) {
                         return 'Please enter a valid email';
                       }
                       return null;
                     },
                   ),
                   const SizedBox(height: 16),
-                  
+
                   // Password field
                   TextFormField(
                     controller: _passwordController,
@@ -115,7 +120,9 @@ class _LoginPageState extends State<LoginPage> {
                       prefixIcon: const Icon(Icons.lock_outlined),
                       suffixIcon: IconButton(
                         icon: Icon(
-                          _obscurePassword ? Icons.visibility : Icons.visibility_off,
+                          _obscurePassword
+                              ? Icons.visibility
+                              : Icons.visibility_off,
                         ),
                         onPressed: () {
                           setState(() {
@@ -135,33 +142,19 @@ class _LoginPageState extends State<LoginPage> {
                     },
                   ),
                   const SizedBox(height: 24),
-                  
+
                   // Sign in button
                   BlocBuilder<AuthBloc, AuthState>(
                     builder: (context, state) {
-                      return ElevatedButton(
+                      return PrimaryButton(
+                        text: 'Sign In',
                         onPressed: state is AuthLoading ? null : _signIn,
-                        style: ElevatedButton.styleFrom(
-                          padding: const EdgeInsets.symmetric(vertical: 16),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(8),
-                          ),
-                        ),
-                        child: state is AuthLoading
-                            ? const SizedBox(
-                                height: 20,
-                                width: 20,
-                                child: CircularProgressIndicator(strokeWidth: 2),
-                              )
-                            : const Text(
-                                'Sign In',
-                                style: TextStyle(fontSize: 16),
-                              ),
+                        isLoading: state is AuthLoading,
                       );
                     },
                   ),
                   const SizedBox(height: 16),
-                  
+
                   // Sign up link
                   Row(
                     mainAxisAlignment: MainAxisAlignment.center,
@@ -170,9 +163,9 @@ class _LoginPageState extends State<LoginPage> {
                         "Don't have an account? ",
                         style: Theme.of(context).textTheme.bodyMedium,
                       ),
-                      TextButton(
+                      TertiaryButton(
+                        text: 'Sign Up',
                         onPressed: () => context.go(AppRouter.register),
-                        child: const Text('Sign Up'),
                       ),
                     ],
                   ),

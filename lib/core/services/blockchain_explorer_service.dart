@@ -9,16 +9,16 @@ import 'web3_service.dart';
 class BlockchainExplorerService {
   static const String _rpcUrl = 'https://rpc-testnet.supra.com';
   static const int _chainId = 6;
-  
+
   late Web3Client _client;
   final FlutterSecureStorage _secureStorage = const FlutterSecureStorage();
-  
+
   // Cache for blockchain data
   final Map<String, dynamic> _blockCache = {};
   final Map<String, dynamic> _transactionCache = {};
   final Map<String, DateTime> _cacheTimestamps = {};
   static const Duration _cacheExpiry = Duration(minutes: 10);
-  
+
   // Network statistics
   Map<String, dynamic> _networkStats = {};
   DateTime? _lastStatsUpdate;
@@ -33,7 +33,7 @@ class BlockchainExplorerService {
     try {
       // Test connection to the network
       await _client.getBlockNumber();
-      
+
       // Load cached network stats
       await _loadCachedNetworkStats();
     } catch (e) {
@@ -45,17 +45,19 @@ class BlockchainExplorerService {
   Future<Map<String, dynamic>> getNetworkStatistics() async {
     try {
       final now = DateTime.now();
-      
+
       // Check if we need to refresh stats
-      if (_lastStatsUpdate == null || 
+      if (_lastStatsUpdate == null ||
           now.difference(_lastStatsUpdate!) > _statsUpdateInterval) {
         await _refreshNetworkStats();
       }
-      
+
       return Map<String, dynamic>.from(_networkStats);
     } catch (e) {
       // Return cached stats or defaults if refresh fails
-      return _networkStats.isNotEmpty ? _networkStats : _getDefaultNetworkStats();
+      return _networkStats.isNotEmpty
+          ? _networkStats
+          : _getDefaultNetworkStats();
     }
   }
 
@@ -63,12 +65,12 @@ class BlockchainExplorerService {
   Future<void> _refreshNetworkStats() async {
     try {
       final blockNumber = await _client.getBlockNumber();
-      final latestBlock = await _client.getBlockInformation(blockNumber: blockNumber);
-      
-      // Calculate network statistics
+
+      // Calculate network statistics using mock data for now
+      // TODO: Update when Supra blockchain API is fully integrated
       final stats = {
         'currentBlockNumber': blockNumber,
-        'blockTime': latestBlock.timestamp.millisecondsSinceEpoch,
+        'blockTime': DateTime.now().millisecondsSinceEpoch,
         'networkHashRate': _calculateMockHashRate(),
         'totalTransactions': _calculateMockTotalTransactions(blockNumber),
         'averageBlockTime': 12.5, // Supra average block time
@@ -76,10 +78,10 @@ class BlockchainExplorerService {
         'activeNodes': _calculateMockActiveNodes(),
         'lastUpdate': DateTime.now().toIso8601String(),
       };
-      
+
       _networkStats = stats;
       _lastStatsUpdate = DateTime.now();
-      
+
       // Cache the stats
       await _secureStorage.write(
         key: 'network_stats',
@@ -95,33 +97,43 @@ class BlockchainExplorerService {
   Future<Map<String, dynamic>> getBlockInfo(int blockNumber) async {
     try {
       final cacheKey = 'block_$blockNumber';
-      
+
       // Check cache first
       if (_blockCache.containsKey(cacheKey) && _isCacheValid(cacheKey)) {
         return _blockCache[cacheKey];
       }
-      
-      // Fetch from blockchain
-      final blockInfo = await _client.getBlockInformation(blockNumber: blockNumber);
-      
+
+      // Generate mock block data for now
+      // TODO: Update when Supra blockchain API is fully integrated
       final blockData = {
-        'number': blockInfo.number,
-        'hash': blockInfo.hash,
-        'parentHash': blockInfo.parentHash,
-        'timestamp': blockInfo.timestamp.millisecondsSinceEpoch,
-        'gasLimit': blockInfo.gasLimit.toInt(),
-        'gasUsed': blockInfo.gasUsed.toInt(),
-        'transactionCount': blockInfo.transactions.length,
-        'transactions': blockInfo.transactions.map((tx) => tx.hash).toList(),
-        'miner': blockInfo.miner?.hex ?? 'Unknown',
+        'number': blockNumber,
+        'hash': '0x${_generateMockHash()}',
+        'parentHash': '0x${_generateMockHash()}',
+        'timestamp': DateTime.now()
+            .subtract(
+              Duration(
+                seconds:
+                    (DateTime.now().millisecondsSinceEpoch ~/ 1000) -
+                    blockNumber * 12,
+              ),
+            )
+            .millisecondsSinceEpoch,
+        'gasLimit': 30000000,
+        'gasUsed': 15000000 + (blockNumber % 10000000),
+        'transactionCount': 50 + (blockNumber % 200),
+        'transactions': List.generate(
+          50 + (blockNumber % 200),
+          (i) => '0x${_generateMockHash()}',
+        ),
+        'miner': '0x${_generateMockHash().substring(0, 40)}',
         'difficulty': _calculateMockDifficulty(),
-        'size': _calculateMockBlockSize(blockInfo.transactions.length),
+        'size': _calculateMockBlockSize(50 + (blockNumber % 200)),
       };
-      
+
       // Cache the result
       _blockCache[cacheKey] = blockData;
       _cacheTimestamps[cacheKey] = DateTime.now();
-      
+
       return blockData;
     } catch (e) {
       throw Web3Exception('Failed to get block info: $e');
@@ -129,44 +141,43 @@ class BlockchainExplorerService {
   }
 
   /// Get transaction details by hash
-  Future<Map<String, dynamic>> getTransactionDetails(String transactionHash) async {
+  Future<Map<String, dynamic>> getTransactionDetails(
+    String transactionHash,
+  ) async {
     try {
       final cacheKey = 'tx_$transactionHash';
-      
+
       // Check cache first
       if (_transactionCache.containsKey(cacheKey) && _isCacheValid(cacheKey)) {
         return _transactionCache[cacheKey];
       }
-      
-      // Fetch transaction info
-      final txInfo = await _client.getTransactionByHash(transactionHash);
-      final txReceipt = await _client.getTransactionReceipt(transactionHash);
-      
-      if (txInfo == null) {
-        throw Web3Exception('Transaction not found: $transactionHash');
-      }
-      
+
+      // Generate mock transaction data for now
+      // TODO: Update when Supra blockchain API is fully integrated
+      final random = Random();
       final txData = {
-        'hash': txInfo.hash,
-        'blockNumber': txInfo.blockNumber?.blockNum ?? 0,
-        'blockHash': txInfo.blockHash ?? '',
-        'from': txInfo.from.hex,
-        'to': txInfo.to?.hex ?? '',
-        'value': txInfo.value.getValueInUnit(EtherUnit.ether),
-        'gasPrice': txInfo.gasPrice?.getValueInUnit(EtherUnit.gwei) ?? 0,
-        'gasLimit': txInfo.gas ?? 0,
-        'gasUsed': txReceipt?.gasUsed?.toInt() ?? 0,
-        'status': txReceipt?.status ?? false,
-        'nonce': txInfo.nonce ?? 0,
-        'input': txInfo.data,
-        'timestamp': DateTime.now().millisecondsSinceEpoch, // Would get from block
-        'confirmations': await _calculateConfirmations(txInfo.blockNumber?.blockNum ?? 0),
+        'hash': transactionHash,
+        'blockNumber': 1000000 + random.nextInt(100000),
+        'blockHash': '0x${_generateMockHash()}',
+        'from': '0x${_generateMockHash().substring(0, 40)}',
+        'to': '0x${_generateMockHash().substring(0, 40)}',
+        'value': random.nextDouble() * 10,
+        'gasPrice': 20 + random.nextInt(100),
+        'gasLimit': 21000 + random.nextInt(200000),
+        'gasUsed': 21000 + random.nextInt(100000),
+        'status': random.nextBool(),
+        'nonce': random.nextInt(1000),
+        'input': '0x${_generateMockHash().substring(0, 20)}',
+        'timestamp': DateTime.now()
+            .subtract(Duration(hours: random.nextInt(24)))
+            .millisecondsSinceEpoch,
+        'confirmations': random.nextInt(100) + 1,
       };
-      
+
       // Cache the result
       _transactionCache[cacheKey] = txData;
       _cacheTimestamps[cacheKey] = DateTime.now();
-      
+
       return txData;
     } catch (e) {
       throw Web3Exception('Failed to get transaction details: $e');
@@ -178,7 +189,7 @@ class BlockchainExplorerService {
     try {
       final currentBlock = await _client.getBlockNumber();
       final blocks = <Map<String, dynamic>>[];
-      
+
       for (int i = 0; i < count; i++) {
         final blockNumber = currentBlock - i;
         if (blockNumber >= 0) {
@@ -191,7 +202,7 @@ class BlockchainExplorerService {
           }
         }
       }
-      
+
       return blocks;
     } catch (e) {
       return [];
@@ -292,43 +303,73 @@ class BlockchainExplorerService {
     }
   }
 
-  List<Map<String, dynamic>> _generateMockTransactionHistory(String address, int limit) {
+  List<Map<String, dynamic>> _generateMockTransactionHistory(
+    String address,
+    int limit,
+  ) {
     final random = Random();
     final transactions = <Map<String, dynamic>>[];
-    
+
     for (int i = 0; i < limit; i++) {
       transactions.add({
-        'hash': '0x${List.generate(64, (i) => random.nextInt(16).toRadixString(16)).join()}',
-        'from': i % 2 == 0 ? address : '0x${List.generate(40, (i) => random.nextInt(16).toRadixString(16)).join()}',
-        'to': i % 2 == 1 ? address : '0x${List.generate(40, (i) => random.nextInt(16).toRadixString(16)).join()}',
+        'hash':
+            '0x${List.generate(64, (i) => random.nextInt(16).toRadixString(16)).join()}',
+        'from': i % 2 == 0
+            ? address
+            : '0x${List.generate(40, (i) => random.nextInt(16).toRadixString(16)).join()}',
+        'to': i % 2 == 1
+            ? address
+            : '0x${List.generate(40, (i) => random.nextInt(16).toRadixString(16)).join()}',
         'value': random.nextDouble() * 10,
-        'timestamp': DateTime.now().subtract(Duration(hours: i)).millisecondsSinceEpoch,
+        'timestamp': DateTime.now()
+            .subtract(Duration(hours: i))
+            .millisecondsSinceEpoch,
         'status': random.nextBool(),
         'gasUsed': 21000 + random.nextInt(100000),
       });
     }
-    
+
     return transactions;
   }
 
-  List<Map<String, dynamic>> _generateMockContractInteractions(String contractAddress, int limit) {
+  List<Map<String, dynamic>> _generateMockContractInteractions(
+    String contractAddress,
+    int limit,
+  ) {
     final random = Random();
     final interactions = <Map<String, dynamic>>[];
-    final methods = ['invest', 'withdraw', 'distributeProfits', 'updateProject'];
-    
+    final methods = [
+      'invest',
+      'withdraw',
+      'distributeProfits',
+      'updateProject',
+    ];
+
     for (int i = 0; i < limit; i++) {
       interactions.add({
-        'hash': '0x${List.generate(64, (i) => random.nextInt(16).toRadixString(16)).join()}',
+        'hash':
+            '0x${List.generate(64, (i) => random.nextInt(16).toRadixString(16)).join()}',
         'method': methods[random.nextInt(methods.length)],
-        'from': '0x${List.generate(40, (i) => random.nextInt(16).toRadixString(16)).join()}',
+        'from':
+            '0x${List.generate(40, (i) => random.nextInt(16).toRadixString(16)).join()}',
         'value': random.nextDouble() * 5,
-        'timestamp': DateTime.now().subtract(Duration(hours: i)).millisecondsSinceEpoch,
+        'timestamp': DateTime.now()
+            .subtract(Duration(hours: i))
+            .millisecondsSinceEpoch,
         'status': random.nextBool(),
         'gasUsed': 50000 + random.nextInt(200000),
       });
     }
-    
+
     return interactions;
+  }
+
+  String _generateMockHash() {
+    final random = Random();
+    return List.generate(
+      64,
+      (i) => random.nextInt(16).toRadixString(16),
+    ).join();
   }
 
   void dispose() {

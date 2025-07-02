@@ -8,6 +8,7 @@ import '../widgets/project_card.dart';
 import '../widgets/search_bar_widget.dart';
 import '../widgets/filter_bottom_sheet.dart';
 import '../widgets/sort_bottom_sheet.dart';
+import '../../../../shared/widgets/widgets.dart';
 
 class MarketplacePage extends StatefulWidget {
   const MarketplacePage({super.key});
@@ -39,17 +40,18 @@ class _MarketplacePageState extends State<MarketplacePage> {
     return BlocProvider.value(
       value: _marketplaceBloc,
       child: Scaffold(
-        appBar: AppBar(
-          title: const Text('Marketplace'),
-          elevation: 0,
+        appBar: CustomAppBar(
+          title: 'Marketplace',
           actions: [
             IconButton(
               icon: const Icon(Icons.sort),
               onPressed: () => _showSortBottomSheet(context),
+              tooltip: 'Sort Projects',
             ),
             IconButton(
               icon: const Icon(Icons.filter_list),
               onPressed: () => _showFilterBottomSheet(context),
+              tooltip: 'Filter Projects',
             ),
           ],
         ),
@@ -75,7 +77,16 @@ class _MarketplacePageState extends State<MarketplacePage> {
               child: BlocBuilder<MarketplaceBloc, MarketplaceState>(
                 builder: (context, state) {
                   if (state is MarketplaceLoading) {
-                    return const Center(child: CircularProgressIndicator());
+                    return const Center(
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          LoadingIndicator(size: 48),
+                          SizedBox(height: 16),
+                          Text('Loading projects...'),
+                        ],
+                      ),
+                    );
                   }
 
                   if (state is MarketplaceError) {
@@ -100,11 +111,11 @@ class _MarketplacePageState extends State<MarketplacePage> {
                             style: Theme.of(context).textTheme.bodyMedium,
                           ),
                           const SizedBox(height: 16),
-                          ElevatedButton(
+                          PrimaryButton(
+                            text: 'Retry',
                             onPressed: () {
                               _marketplaceBloc.add(const LoadProjects());
                             },
-                            child: const Text('Retry'),
                           ),
                         ],
                       ),
@@ -135,12 +146,12 @@ class _MarketplacePageState extends State<MarketplacePage> {
                                   ?.copyWith(color: Colors.grey[500]),
                             ),
                             const SizedBox(height: 16),
-                            TextButton(
+                            TertiaryButton(
+                              text: 'Clear All Filters',
                               onPressed: () {
                                 _searchController.clear();
                                 _marketplaceBloc.add(const ClearFilters());
                               },
-                              child: const Text('Clear All Filters'),
                             ),
                           ],
                         ),

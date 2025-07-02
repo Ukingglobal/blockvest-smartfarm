@@ -4,10 +4,7 @@ import 'package:flutter/services.dart';
 class TransactionDetailsPage extends StatefulWidget {
   final String transactionHash;
 
-  const TransactionDetailsPage({
-    super.key,
-    required this.transactionHash,
-  });
+  const TransactionDetailsPage({super.key, required this.transactionHash});
 
   @override
   State<TransactionDetailsPage> createState() => _TransactionDetailsPageState();
@@ -39,7 +36,8 @@ class _TransactionDetailsPageState extends State<TransactionDetailsPage> {
         'hash': widget.transactionHash,
         'status': 'confirmed',
         'blockNumber': 1234567,
-        'blockHash': '0xabcdef1234567890abcdef1234567890abcdef1234567890abcdef1234567890',
+        'blockHash':
+            '0xabcdef1234567890abcdef1234567890abcdef1234567890abcdef1234567890',
         'transactionIndex': 42,
         'from': '0x1234567890123456789012345678901234567890',
         'to': '0x0987654321098765432109876543210987654321',
@@ -49,7 +47,9 @@ class _TransactionDetailsPageState extends State<TransactionDetailsPage> {
         'gasPrice': '20',
         'totalGasFee': '0.00042',
         'nonce': 156,
-        'timestamp': DateTime.now().subtract(const Duration(minutes: 15)).millisecondsSinceEpoch,
+        'timestamp': DateTime.now()
+            .subtract(const Duration(minutes: 15))
+            .millisecondsSinceEpoch,
         'confirmations': 12,
         'type': 'transfer',
         'data': '0x',
@@ -88,8 +88,8 @@ class _TransactionDetailsPageState extends State<TransactionDetailsPage> {
       body: _isLoading
           ? const Center(child: CircularProgressIndicator())
           : _error != null
-              ? _buildErrorWidget()
-              : _buildTransactionDetails(),
+          ? _buildErrorWidget()
+          : _buildTransactionDetails(),
     );
   }
 
@@ -139,7 +139,7 @@ class _TransactionDetailsPageState extends State<TransactionDetailsPage> {
           const SizedBox(height: 16),
           _buildTransactionOverview(),
           const SizedBox(height: 16),
-          _buildTransactionDetails(),
+          _buildTransactionInfo(),
           const SizedBox(height: 16),
           _buildGasInformation(),
           const SizedBox(height: 16),
@@ -156,7 +156,7 @@ class _TransactionDetailsPageState extends State<TransactionDetailsPage> {
   Widget _buildStatusCard() {
     final status = _transactionData!['status'] as String;
     final confirmations = _transactionData!['confirmations'] as int;
-    
+
     Color statusColor;
     IconData statusIcon;
     String statusText;
@@ -231,23 +231,26 @@ class _TransactionDetailsPageState extends State<TransactionDetailsPage> {
           children: [
             Text(
               'Transaction Overview',
-              style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                fontWeight: FontWeight.bold,
-              ),
+              style: Theme.of(
+                context,
+              ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 16),
             _buildDetailRow('Hash', _transactionData!['hash'], copyable: true),
             _buildDetailRow('Value', '${_transactionData!['value']} SUPRA'),
             _buildDetailRow('From', _transactionData!['from'], copyable: true),
             _buildDetailRow('To', _transactionData!['to'], copyable: true),
-            _buildDetailRow('Timestamp', _formatTimestamp(_transactionData!['timestamp'])),
+            _buildDetailRow(
+              'Timestamp',
+              _formatTimestamp(_transactionData!['timestamp']),
+            ),
           ],
         ),
       ),
     );
   }
 
-  Widget _buildTransactionDetails() {
+  Widget _buildTransactionInfo() {
     return Card(
       child: Padding(
         padding: const EdgeInsets.all(16),
@@ -256,16 +259,26 @@ class _TransactionDetailsPageState extends State<TransactionDetailsPage> {
           children: [
             Text(
               'Transaction Details',
-              style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                fontWeight: FontWeight.bold,
-              ),
+              style: Theme.of(
+                context,
+              ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 16),
-            _buildDetailRow('Type', _transactionData!['type'].toString().toUpperCase()),
+            _buildDetailRow(
+              'Type',
+              _transactionData!['type'].toString().toUpperCase(),
+            ),
             _buildDetailRow('Nonce', _transactionData!['nonce'].toString()),
-            _buildDetailRow('Transaction Index', _transactionData!['transactionIndex'].toString()),
+            _buildDetailRow(
+              'Transaction Index',
+              _transactionData!['transactionIndex'].toString(),
+            ),
             if (_transactionData!['data'] != '0x')
-              _buildDetailRow('Input Data', _transactionData!['data'], copyable: true),
+              _buildDetailRow(
+                'Input Data',
+                _transactionData!['data'],
+                copyable: true,
+              ),
           ],
         ),
       ),
@@ -287,9 +300,9 @@ class _TransactionDetailsPageState extends State<TransactionDetailsPage> {
           children: [
             Text(
               'Gas Information',
-              style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                fontWeight: FontWeight.bold,
-              ),
+              style: Theme.of(
+                context,
+              ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 16),
             _buildDetailRow('Gas Used', '$gasUsed'),
@@ -306,16 +319,18 @@ class _TransactionDetailsPageState extends State<TransactionDetailsPage> {
                 ),
                 Text(
                   '${gasUtilization.toStringAsFixed(1)}%',
-                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                    fontWeight: FontWeight.bold,
-                  ),
+                  style: Theme.of(
+                    context,
+                  ).textTheme.bodyMedium?.copyWith(fontWeight: FontWeight.bold),
                 ),
               ],
             ),
             const SizedBox(height: 4),
             LinearProgressIndicator(
               value: gasUtilization / 100,
-              backgroundColor: Theme.of(context).colorScheme.outline.withOpacity(0.2),
+              backgroundColor: Theme.of(
+                context,
+              ).colorScheme.outline.withOpacity(0.2),
               valueColor: AlwaysStoppedAnimation<Color>(
                 gasUtilization > 80 ? Colors.red : Colors.green,
               ),
@@ -335,14 +350,24 @@ class _TransactionDetailsPageState extends State<TransactionDetailsPage> {
           children: [
             Text(
               'Block Information',
-              style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                fontWeight: FontWeight.bold,
-              ),
+              style: Theme.of(
+                context,
+              ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 16),
-            _buildDetailRow('Block Number', _transactionData!['blockNumber'].toString()),
-            _buildDetailRow('Block Hash', _transactionData!['blockHash'], copyable: true),
-            _buildDetailRow('Confirmations', _transactionData!['confirmations'].toString()),
+            _buildDetailRow(
+              'Block Number',
+              _transactionData!['blockNumber'].toString(),
+            ),
+            _buildDetailRow(
+              'Block Hash',
+              _transactionData!['blockHash'],
+              copyable: true,
+            ),
+            _buildDetailRow(
+              'Confirmations',
+              _transactionData!['confirmations'].toString(),
+            ),
           ],
         ),
       ),
@@ -358,9 +383,9 @@ class _TransactionDetailsPageState extends State<TransactionDetailsPage> {
           children: [
             Text(
               'Event Logs',
-              style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                fontWeight: FontWeight.bold,
-              ),
+              style: Theme.of(
+                context,
+              ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 16),
             const Text('No event logs for this transaction'),
@@ -423,9 +448,7 @@ class _TransactionDetailsPageState extends State<TransactionDetailsPage> {
   void _shareTransaction() {
     // Implement share functionality
     ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-        content: Text('Share functionality not implemented yet'),
-      ),
+      const SnackBar(content: Text('Share functionality not implemented yet')),
     );
   }
 }

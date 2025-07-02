@@ -13,6 +13,7 @@ import '../widgets/transaction_history_list.dart';
 import '../widgets/portfolio_overview.dart';
 import '../widgets/wallet_connection_status.dart';
 import '../../domain/repositories/wallet_repository.dart';
+import '../../../../shared/widgets/widgets.dart';
 
 class WalletPage extends StatefulWidget {
   const WalletPage({super.key});
@@ -44,21 +45,15 @@ class _WalletPageState extends State<WalletPage>
           WalletBloc(walletRepository: GetIt.instance<WalletRepository>())
             ..add(const LoadWalletEvent()),
       child: Scaffold(
-        backgroundColor: Colors.grey[50],
-        appBar: AppBar(
-          title: const Text(
-            'Wallet',
-            style: TextStyle(fontWeight: FontWeight.bold),
-          ),
-          backgroundColor: Colors.white,
-          foregroundColor: Colors.black,
-          elevation: 0,
+        appBar: CustomAppBar(
+          title: 'Wallet',
           actions: [
             IconButton(
               icon: const Icon(Icons.refresh),
               onPressed: () {
                 context.read<WalletBloc>().add(const RefreshBalanceEvent());
               },
+              tooltip: 'Refresh Balance',
             ),
             IconButton(
               icon: const Icon(Icons.explore),
@@ -72,13 +67,16 @@ class _WalletPageState extends State<WalletPage>
               onPressed: () {
                 // TODO: Navigate to wallet settings
               },
+              tooltip: 'Wallet Settings',
             ),
           ],
           bottom: TabBar(
             controller: _tabController,
-            labelColor: Theme.of(context).primaryColor,
-            unselectedLabelColor: Colors.grey,
-            indicatorColor: Theme.of(context).primaryColor,
+            labelColor: Theme.of(context).colorScheme.primary,
+            unselectedLabelColor: Theme.of(
+              context,
+            ).colorScheme.onSurface.withValues(alpha: 0.6),
+            indicatorColor: Theme.of(context).colorScheme.primary,
             tabs: const [
               Tab(text: 'Overview'),
               Tab(text: 'Transactions'),
@@ -93,7 +91,16 @@ class _WalletPageState extends State<WalletPage>
             }
 
             if (state is WalletLoading) {
-              return const Center(child: CircularProgressIndicator());
+              return const Center(
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    LoadingIndicator(size: 48),
+                    SizedBox(height: 16),
+                    Text('Loading wallet...'),
+                  ],
+                ),
+              );
             }
 
             if (state is WalletError) {
@@ -101,7 +108,7 @@ class _WalletPageState extends State<WalletPage>
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    Icon(Icons.error_outline, size: 64, color: Colors.red[300]),
+                    Icon(Icons.error_outline, size: 64, color: Colors.red),
                     const SizedBox(height: 16),
                     Text(
                       'Error loading wallet',
@@ -111,14 +118,18 @@ class _WalletPageState extends State<WalletPage>
                     Text(
                       state.message,
                       textAlign: TextAlign.center,
-                      style: TextStyle(color: Colors.grey[600]),
+                      style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                        color: Theme.of(
+                          context,
+                        ).colorScheme.onSurface.withValues(alpha: 0.7),
+                      ),
                     ),
                     const SizedBox(height: 24),
-                    ElevatedButton(
+                    PrimaryButton(
+                      text: 'Retry',
                       onPressed: () {
                         context.read<WalletBloc>().add(const LoadWalletEvent());
                       },
-                      child: const Text('Retry'),
                     ),
                   ],
                 ),
@@ -171,9 +182,9 @@ class _WalletPageState extends State<WalletPage>
             isCompact: true,
           ),
           const SizedBox(height: 16),
-          TextButton(
+          TertiaryButton(
+            text: 'View All Transactions',
             onPressed: () => _tabController.animateTo(1),
-            child: const Text('View All Transactions'),
           ),
         ],
       ),
