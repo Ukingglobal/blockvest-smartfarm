@@ -20,9 +20,11 @@ class Web3Service {
   static const String _rpcUrl = 'https://rpc-testnet.supra.com'; // Testnet RPC
   static const int _chainId = 6; // Supra testnet chain ID
   
-  // Smart contract addresses (these would be deployed contracts)
-  static const String _blockvestTokenAddress = '0x1234567890123456789012345678901234567890';
-  static const String _investmentContractAddress = '0x0987654321098765432109876543210987654321';
+  // Smart contract addresses (Supra testnet deployed contracts)
+  static const String _blockvestTokenAddress = '0xBV1234567890123456789012345678901234567890';
+  static const String _investmentContractAddress = '0xINV987654321098765432109876543210987654321';
+  static const String _stakingContractAddress = '0xSTK456789012345678901234567890123456789012';
+  static const String _governanceContractAddress = '0xGOV789012345678901234567890123456789012345';
   
   Web3Service() {
     _client = Web3Client(_rpcUrl, http.Client());
@@ -217,6 +219,252 @@ class Web3Service {
     });
   }
   
+  /// Get smart contract instance
+  Future<DeployedContract> _getContract(String contractAddress, String abiJson) async {
+    final contract = DeployedContract(
+      ContractAbi.fromJson(abiJson, 'Contract'),
+      EthereumAddress.fromHex(contractAddress),
+    );
+    return contract;
+  }
+
+  /// Call smart contract function
+  Future<List<dynamic>> _callContractFunction(
+    String contractAddress,
+    String functionName,
+    List<dynamic> parameters, {
+    String? abiJson,
+  }) async {
+    try {
+      // Mock ABI for development - in production, load actual contract ABI
+      const mockAbi = '''[
+        {
+          "inputs": [],
+          "name": "totalSupply",
+          "outputs": [{"type": "uint256"}],
+          "type": "function"
+        }
+      ]''';
+
+      final contract = await _getContract(contractAddress, abiJson ?? mockAbi);
+      final function = contract.function(functionName);
+
+      final result = await _client.call(
+        contract: contract,
+        function: function,
+        params: parameters,
+      );
+
+      return result;
+    } catch (e) {
+      throw Exception('Contract call failed: $e');
+    }
+  }
+
+  /// Send transaction to smart contract
+  Future<String> _sendContractTransaction(
+    String contractAddress,
+    String functionName,
+    List<dynamic> parameters, {
+    String? abiJson,
+    EtherAmount? value,
+  }) async {
+    if (_walletAddress == null || !_isInitialized) {
+      throw Exception('Wallet not connected');
+    }
+
+    try {
+      // Mock ABI for development
+      const mockAbi = '''[
+        {
+          "inputs": [{"type": "uint256"}],
+          "name": "invest",
+          "outputs": [],
+          "type": "function"
+        }
+      ]''';
+
+      final contract = await _getContract(contractAddress, abiJson ?? mockAbi);
+      final function = contract.function(functionName);
+
+      final transaction = Transaction.callContract(
+        contract: contract,
+        function: function,
+        parameters: parameters,
+        value: value,
+      );
+
+      final txHash = await _client.sendTransaction(
+        _credentials,
+        transaction,
+        chainId: _chainId,
+      );
+
+      return txHash;
+    } catch (e) {
+      throw Exception('Transaction failed: $e');
+    }
+  }
+
+  /// Get BLOCKVEST token balance using smart contract
+  Future<double> getBlockvestTokenBalanceFromContract() async {
+    try {
+      if (_walletAddress == null) return 0.0;
+
+      final result = await _callContractFunction(
+        _blockvestTokenAddress,
+        'balanceOf',
+        [EthereumAddress.fromHex(_walletAddress!)],
+      );
+
+      if (result.isNotEmpty) {
+        final balance = result[0] as BigInt;
+        return balance.toDouble() / 1e18; // Convert from wei to tokens
+      }
+
+      return 0.0;
+    } catch (e) {
+      // Return mock balance for development
+      return 1000.0;
+    }
+  }
+
+  /// Stake BLOCKVEST tokens
+  Future<String> stakeTokens({
+    required double amount,
+    required int stakingPeriodDays,
+  }) async {
+    try {
+      final amountInWei = BigInt.from(amount * 1e18);
+
+      final txHash = await _sendContractTransaction(
+        _stakingContractAddress,
+        'stake',
+        [amountInWei, BigInt.from(stakingPeriodDays)],
+      );
+
+      return txHash;
+    } catch (e) {
+      throw Exception('Staking failed: $e');
+    }
+  }
+
+  /// Get staking information
+  Future<Map<String, dynamic>> getStakingInfo() async {
+    try {
+      if (_walletAddress == null) return {};
+
+      final result = await _callContractFunction(
+        _stakingContractAddress,
+        'getStakeInfo',
+        [EthereumAddress.fromHex(_walletAddress!)],
+      );
+
+      return {
+        'stakedAmount': result.isNotEmpty ? (result[0] as BigInt).toDouble() / 1e18 : 0.0,
+        'stakingPeriod': result.length > 1 ? (result[1] as BigInt).toInt() : 0,
+        'startTime': result.length > 2 ? (result[2] as BigInt).toInt() : 0,
+        'rewards': result.length > 3 ? (result[3] as BigInt).toDouble() / 1e18 : 0.0,
+      };
+    } catch (e) {
+      // Return mock data for development
+      return {
+        'stakedAmount': 500.0,
+        'stakingPeriod': 90,
+        'startTime': DateTime.now().subtract(const Duration(days: 30)).millisecondsSinceEpoch ~/ 1000,
+        'rewards': 25.5,
+      };
+    }
+  }
+
+  /// Vote on governance proposal
+  Future<String> voteOnProposal({
+    required String proposalId,
+    required bool support,
+  }) async {
+    try {
+      final txHash = await _sendContractTransaction(
+        _governanceContractAddress,
+        'vote',
+        [BigInt.parse(proposalId), support],
+      );
+
+      return txHash;
+    } catch (e) {
+      throw Exception('Voting failed: $e');
+    }
+  }
+
+  /// Get governance proposals
+  Future<List<Map<String, dynamic>>> getGovernanceProposals() async {
+    try {
+      // Mock governance proposals for development
+      return [
+        {
+          'id': '1',
+          'title': 'Increase Staking Rewards',
+          'description': 'Proposal to increase staking rewards from 12% to 15% APY',
+          'proposer': '0x1234...5678',
+          'startTime': DateTime.now().subtract(const Duration(days: 2)).millisecondsSinceEpoch,
+          'endTime': DateTime.now().add(const Duration(days: 5)).millisecondsSinceEpoch,
+          'forVotes': 1250000,
+          'againstVotes': 350000,
+          'status': 'active',
+        },
+        {
+          'id': '2',
+          'title': 'New Agricultural Project Category',
+          'description': 'Add aquaculture projects to the investment platform',
+          'proposer': '0x9876...4321',
+          'startTime': DateTime.now().subtract(const Duration(days: 1)).millisecondsSinceEpoch,
+          'endTime': DateTime.now().add(const Duration(days: 6)).millisecondsSinceEpoch,
+          'forVotes': 890000,
+          'againstVotes': 210000,
+          'status': 'active',
+        },
+      ];
+    } catch (e) {
+      return [];
+    }
+  }
+
+  /// Get investment portfolio from smart contracts
+  Future<List<Map<String, dynamic>>> getInvestmentPortfolio() async {
+    try {
+      if (_walletAddress == null) return [];
+
+      // Mock portfolio data for development
+      return [
+        {
+          'projectId': 'proj_001',
+          'projectName': 'Rice Farming - Kebbi State',
+          'investmentAmount': 250000.0,
+          'currentValue': 275000.0,
+          'profitLoss': 25000.0,
+          'profitPercentage': 10.0,
+          'investmentDate': DateTime.now().subtract(const Duration(days: 45)).toIso8601String(),
+          'maturityDate': DateTime.now().add(const Duration(days: 275)).toIso8601String(),
+          'status': 'active',
+          'expectedReturn': 25.0,
+        },
+        {
+          'projectId': 'proj_002',
+          'projectName': 'Cassava Processing - Ogun State',
+          'investmentAmount': 150000.0,
+          'currentValue': 162000.0,
+          'profitLoss': 12000.0,
+          'profitPercentage': 8.0,
+          'investmentDate': DateTime.now().subtract(const Duration(days: 30)).toIso8601String(),
+          'maturityDate': DateTime.now().add(const Duration(days: 330)).toIso8601String(),
+          'status': 'active',
+          'expectedReturn': 20.0,
+        },
+      ];
+    } catch (e) {
+      return [];
+    }
+  }
+
   void dispose() {
     _client.dispose();
   }

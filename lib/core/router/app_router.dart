@@ -11,6 +11,7 @@ import '../../features/dashboard/presentation/pages/dashboard_page.dart';
 import '../../features/marketplace/presentation/pages/marketplace_page.dart';
 import '../../features/marketplace/presentation/pages/project_details_page.dart';
 import '../../features/wallet/presentation/pages/wallet_page.dart';
+import '../../features/staking/presentation/pages/staking_page.dart';
 import '../../features/governance/presentation/pages/governance_page.dart';
 import '../../features/settings/presentation/pages/settings_page.dart';
 
@@ -24,6 +25,7 @@ class AppRouter {
   static const String marketplace = '/marketplace';
   static const String farmDetails = '/farm-details';
   static const String wallet = '/wallet';
+  static const String staking = '/staking';
   static const String governance = '/governance';
   static const String settings = '/settings';
 
@@ -80,6 +82,11 @@ class AppRouter {
         path: wallet,
         name: 'wallet',
         builder: (context, state) => const WalletPage(),
+      ),
+      GoRoute(
+        path: staking,
+        name: 'staking',
+        builder: (context, state) => const StakingPage(),
       ),
       GoRoute(
         path: governance,
