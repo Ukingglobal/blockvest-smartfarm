@@ -2,6 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../../core/router/app_router.dart';
+import '../../../../core/services/biometric_service.dart';
+import '../../../../core/services/face_scanning_service.dart';
+import '../../../../core/di/injection_container.dart' as di;
+import '../../../../shared/widgets/blockvest_button.dart';
+import '../../../../shared/widgets/blockvest_input_field.dart';
+import '../../../../core/theme/app_theme.dart';
 
 class KycPage extends StatefulWidget {
   const KycPage({super.key});
@@ -19,12 +25,31 @@ class _KycPageState extends State<KycPage> {
   String? _selectedIdType;
   String? _selectedState;
 
+  // Services
+  late final BiometricService _biometricService;
+  late final FaceScanningService _faceScanningService;
+
+  // State variables
+  bool _isLoading = false;
+  bool _biometricEnabled = false;
+  bool _faceVerified = false;
+  String? _biometricStatus;
+  String? _faceVerificationStatus;
+
   final List<String> _idTypes = [
     'National ID',
     'Driver\'s License',
     'International Passport',
     'Voter\'s Card',
   ];
+
+  @override
+  void initState() {
+    super.initState();
+    _biometricService = di.sl<BiometricService>();
+    _faceScanningService = di.sl<FaceScanningService>();
+    _initializeBiometrics();
+  }
 
   final List<String> _nigerianStates = [
     'Abia', 'Adamawa', 'Akwa Ibom', 'Anambra', 'Bauchi', 'Bayelsa', 'Benue',
@@ -43,15 +68,106 @@ class _KycPageState extends State<KycPage> {
     super.dispose();
   }
 
+  Future<void> _initializeBiometrics() async {
+    try {
+      final isAvailable = await _biometricService.isBiometricAvailable();
+      final biometrics = await _biometricService.getAvailableBiometrics();
+      final isEnabled = await _biometricService.isBiometricEnabled();
+      final isFaceVerified = await _faceScanningService.isKYCFaceVerified();
+
+      setState(() {
+        _biometricEnabled = isEnabled;
+        _faceVerified = isFaceVerified;
+        _biometricStatus = isAvailable
+            ? _biometricService.getBiometricStatusMessage(biometrics)
+            : 'Biometric authentication not available';
+      });
+    } catch (e) {
+      setState(() {
+        _biometricStatus = 'Error checking biometric availability';
+      });
+    }
+  }
+
+  Future<void> _enableBiometricAuth() async {
+    setState(() => _isLoading = true);
+
+    try {
+      final success = await _biometricService.enableBiometricAuth();
+
+      setState(() {
+        _biometricEnabled = success;
+        _isLoading = false;
+      });
+
+      if (success) {
+        _showSuccessSnackBar('Biometric authentication enabled successfully');
+      } else {
+        _showErrorSnackBar('Failed to enable biometric authentication');
+      }
+    } catch (e) {
+      setState(() => _isLoading = false);
+      _showErrorSnackBar('Error: ${e.toString()}');
+    }
+  }
+
+  Future<void> _performFaceVerification() async {
+    setState(() => _isLoading = true);
+
+    try {
+      final result = await _faceScanningService.completeKYCFaceVerification();
+
+      setState(() {
+        _faceVerified = result.success;
+        _faceVerificationStatus = result.message;
+        _isLoading = false;
+      });
+
+      if (result.success) {
+        _showSuccessSnackBar('Face verification completed successfully');
+      } else {
+        _showErrorSnackBar(result.message);
+      }
+    } catch (e) {
+      setState(() => _isLoading = false);
+      _showErrorSnackBar('Face verification failed: ${e.toString()}');
+    }
+  }
+
+  void _showSuccessSnackBar(String message) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(message),
+        backgroundColor: AppTheme.successColor,
+      ),
+    );
+  }
+
+  void _showErrorSnackBar(String message) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(message),
+        backgroundColor: AppTheme.errorColor,
+      ),
+    );
+  }
+
   void _submitKyc() {
     if (_formKey.currentState!.validate()) {
-      // For MVP, we'll just show a success message and navigate to dashboard
+      // Check if biometric and face verification are completed
+      if (!_biometricEnabled || !_faceVerified) {
+        _showErrorSnackBar(
+          'Please complete biometric authentication and face verification before submitting KYC'
+        );
+        return;
+      }
+
       showDialog(
         context: context,
         builder: (context) => AlertDialog(
           title: const Text('KYC Submitted'),
           content: const Text(
-            'Your KYC information has been submitted successfully. '
+            'Your KYC information has been submitted successfully with biometric verification. '
             'You will be notified once verification is complete.',
           ),
           actions: [
@@ -134,56 +250,36 @@ class _KycPageState extends State<KycPage> {
                 const SizedBox(height: 32),
                 
                 // Phone Number field
-                TextFormField(
+                BlockVestInputField(
+                  label: 'Phone Number',
+                  hint: '+234 XXX XXX XXXX',
                   controller: _phoneController,
-                  keyboardType: TextInputType.phone,
-                  decoration: const InputDecoration(
-                    labelText: 'Phone Number',
-                    prefixIcon: Icon(Icons.phone_outlined),
-                    hintText: '+234 XXX XXX XXXX',
-                  ),
-                  validator: (value) {
-                    if (value == null || value.isEmpty) {
-                      return 'Please enter your phone number';
-                    }
-                    return null;
-                  },
+                  type: BlockVestInputType.phone,
+                  prefixIcon: Icons.phone_outlined,
+                  isRequired: true,
                 ),
-                const SizedBox(height: 16),
-                
+                const SizedBox(height: AppTheme.spacingM),
+
                 // Address field
-                TextFormField(
+                BlockVestInputField(
+                  label: 'Address',
+                  hint: 'Enter your full address',
                   controller: _addressController,
+                  type: BlockVestInputType.multiline,
+                  prefixIcon: Icons.location_on_outlined,
+                  isRequired: true,
                   maxLines: 2,
-                  decoration: const InputDecoration(
-                    labelText: 'Address',
-                    prefixIcon: Icon(Icons.location_on_outlined),
-                    hintText: 'Enter your full address',
-                  ),
-                  validator: (value) {
-                    if (value == null || value.isEmpty) {
-                      return 'Please enter your address';
-                    }
-                    return null;
-                  },
                 ),
-                const SizedBox(height: 16),
-                
+                const SizedBox(height: AppTheme.spacingM),
+
                 // City field
-                TextFormField(
+                BlockVestInputField(
+                  label: 'City',
                   controller: _cityController,
-                  decoration: const InputDecoration(
-                    labelText: 'City',
-                    prefixIcon: Icon(Icons.location_city_outlined),
-                  ),
-                  validator: (value) {
-                    if (value == null || value.isEmpty) {
-                      return 'Please enter your city';
-                    }
-                    return null;
-                  },
+                  prefixIcon: Icons.location_city_outlined,
+                  isRequired: true,
                 ),
-                const SizedBox(height: 16),
+                const SizedBox(height: AppTheme.spacingM),
                 
                 // State dropdown
                 DropdownButtonFormField<String>(
@@ -283,25 +379,224 @@ class _KycPageState extends State<KycPage> {
                     ],
                   ),
                 ),
-                const SizedBox(height: 32),
-                
+                const SizedBox(height: AppTheme.spacingXL),
+
+                // Biometric Authentication Section
+                _buildBiometricSection(),
+                const SizedBox(height: AppTheme.spacingL),
+
+                // Face Verification Section
+                _buildFaceVerificationSection(),
+                const SizedBox(height: AppTheme.spacingXL),
+
                 // Submit button
-                ElevatedButton(
+                BlockVestButton.primary(
+                  text: 'Submit KYC',
                   onPressed: _submitKyc,
-                  style: ElevatedButton.styleFrom(
-                    padding: const EdgeInsets.symmetric(vertical: 16),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(8),
-                    ),
-                  ),
-                  child: const Text(
-                    'Submit KYC',
-                    style: TextStyle(fontSize: 16),
-                  ),
+                  isFullWidth: true,
+                  isLoading: _isLoading,
                 ),
               ],
             ),
           ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildBiometricSection() {
+    return Card(
+      elevation: 2,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(AppTheme.radiusL),
+      ),
+      child: Padding(
+        padding: const EdgeInsets.all(AppTheme.spacingL),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                Icon(
+                  Icons.fingerprint,
+                  color: _biometricEnabled ? AppTheme.successColor : AppTheme.textSecondary,
+                  size: 28,
+                ),
+                const SizedBox(width: AppTheme.spacingM),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'Biometric Authentication',
+                        style: AppTheme.titleMedium.copyWith(
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                      const SizedBox(height: AppTheme.spacingXS),
+                      Text(
+                        _biometricStatus ?? 'Checking availability...',
+                        style: AppTheme.bodyMedium.copyWith(
+                          color: AppTheme.textSecondary,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                if (_biometricEnabled)
+                  Icon(
+                    Icons.check_circle,
+                    color: AppTheme.successColor,
+                    size: 24,
+                  ),
+              ],
+            ),
+            const SizedBox(height: AppTheme.spacingM),
+            if (!_biometricEnabled) ...[
+              Text(
+                'Enable biometric authentication for enhanced security and quick access to your account.',
+                style: AppTheme.bodyMedium.copyWith(
+                  color: AppTheme.textSecondary,
+                ),
+              ),
+              const SizedBox(height: AppTheme.spacingM),
+              BlockVestButton.outline(
+                text: 'Enable Biometric Auth',
+                onPressed: _enableBiometricAuth,
+                icon: Icons.fingerprint,
+                isLoading: _isLoading,
+              ),
+            ] else ...[
+              Container(
+                padding: const EdgeInsets.all(AppTheme.spacingM),
+                decoration: BoxDecoration(
+                  color: AppTheme.successColor.withOpacity(0.1),
+                  borderRadius: BorderRadius.circular(AppTheme.radiusM),
+                  border: Border.all(
+                    color: AppTheme.successColor.withOpacity(0.3),
+                  ),
+                ),
+                child: Row(
+                  children: [
+                    Icon(
+                      Icons.check_circle_outline,
+                      color: AppTheme.successColor,
+                      size: 20,
+                    ),
+                    const SizedBox(width: AppTheme.spacingS),
+                    Expanded(
+                      child: Text(
+                        'Biometric authentication enabled successfully',
+                        style: AppTheme.bodyMedium.copyWith(
+                          color: AppTheme.successColor,
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildFaceVerificationSection() {
+    return Card(
+      elevation: 2,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(AppTheme.radiusL),
+      ),
+      child: Padding(
+        padding: const EdgeInsets.all(AppTheme.spacingL),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                Icon(
+                  Icons.face,
+                  color: _faceVerified ? AppTheme.successColor : AppTheme.textSecondary,
+                  size: 28,
+                ),
+                const SizedBox(width: AppTheme.spacingM),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'Face Verification',
+                        style: AppTheme.titleMedium.copyWith(
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                      const SizedBox(height: AppTheme.spacingXS),
+                      Text(
+                        _faceVerificationStatus ?? 'Required for KYC compliance',
+                        style: AppTheme.bodyMedium.copyWith(
+                          color: AppTheme.textSecondary,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                if (_faceVerified)
+                  Icon(
+                    Icons.check_circle,
+                    color: AppTheme.successColor,
+                    size: 24,
+                  ),
+              ],
+            ),
+            const SizedBox(height: AppTheme.spacingM),
+            if (!_faceVerified) ...[
+              Text(
+                'Complete face verification to ensure secure identity verification for KYC compliance.',
+                style: AppTheme.bodyMedium.copyWith(
+                  color: AppTheme.textSecondary,
+                ),
+              ),
+              const SizedBox(height: AppTheme.spacingM),
+              BlockVestButton.outline(
+                text: 'Start Face Verification',
+                onPressed: _performFaceVerification,
+                icon: Icons.camera_alt,
+                isLoading: _isLoading,
+              ),
+            ] else ...[
+              Container(
+                padding: const EdgeInsets.all(AppTheme.spacingM),
+                decoration: BoxDecoration(
+                  color: AppTheme.successColor.withOpacity(0.1),
+                  borderRadius: BorderRadius.circular(AppTheme.radiusM),
+                  border: Border.all(
+                    color: AppTheme.successColor.withOpacity(0.3),
+                  ),
+                ),
+                child: Row(
+                  children: [
+                    Icon(
+                      Icons.check_circle_outline,
+                      color: AppTheme.successColor,
+                      size: 20,
+                    ),
+                    const SizedBox(width: AppTheme.spacingS),
+                    Expanded(
+                      child: Text(
+                        'Face verification completed successfully',
+                        style: AppTheme.bodyMedium.copyWith(
+                          color: AppTheme.successColor,
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ],
         ),
       ),
     );

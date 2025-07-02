@@ -1,17 +1,23 @@
 import 'package:flutter/material.dart';
 
 class AppTheme {
-  // Color Palette
-  static const Color primaryGreen = Color(0xFF2E7D32);
-  static const Color secondaryGreen = Color(0xFF4CAF50);
-  static const Color accentGold = Color(0xFFFFB300);
-  static const Color backgroundLight = Color(0xFFF8F9FA);
+  // BlockVest Design System Color Palette
+  static const Color primaryGreen = Color(0xFF1B5E20); // Dark Green
+  static const Color secondaryGold = Color(0xFFFFD700); // Gold
+  static const Color backgroundLight = Color(0xFFFFFFFF); // White
   static const Color backgroundDark = Color(0xFF121212);
   static const Color surfaceLight = Color(0xFFFFFFFF);
   static const Color surfaceDark = Color(0xFF1E1E1E);
-  static const Color errorColor = Color(0xFFD32F2F);
-  static const Color successColor = Color(0xFF388E3C);
-  static const Color warningColor = Color(0xFFF57C00);
+  static const Color errorColor = Color(0xFFD32F2F); // Red
+  static const Color successColor = Color(0xFF1B5E20); // Dark Green
+  static const Color warningColor = Color(0xFFFFD700); // Gold
+
+  // Additional BlockVest Colors
+  static const Color accentGreen = Color(0xFF2E7D32);
+  static const Color lightGreen = Color(0xFF4CAF50);
+  static const Color textPrimary = Color(0xFF212121);
+  static const Color textSecondary = Color(0xFF757575);
+  static const Color dividerColor = Color(0xFFE0E0E0);
 
   // Light Theme
   static ThemeData lightTheme = ThemeData(
@@ -21,10 +27,15 @@ class AppTheme {
       seedColor: primaryGreen,
       brightness: Brightness.light,
       primary: primaryGreen,
-      secondary: secondaryGreen,
-      tertiary: accentGold,
+      secondary: secondaryGold,
+      tertiary: accentGreen,
       surface: surfaceLight,
+      background: backgroundLight,
       error: errorColor,
+      onPrimary: Colors.white,
+      onSecondary: textPrimary,
+      onSurface: textPrimary,
+      onBackground: textPrimary,
     ),
     appBarTheme: const AppBarTheme(
       elevation: 0,
@@ -42,8 +53,34 @@ class AppTheme {
         backgroundColor: primaryGreen,
         foregroundColor: Colors.white,
         elevation: 2,
-        padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+        padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+        textStyle: const TextStyle(
+          fontSize: 16,
+          fontWeight: FontWeight.w600,
+        ),
+      ),
+    ),
+    outlinedButtonTheme: OutlinedButtonThemeData(
+      style: OutlinedButton.styleFrom(
+        foregroundColor: primaryGreen,
+        side: const BorderSide(color: primaryGreen, width: 1.5),
+        padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+        textStyle: const TextStyle(
+          fontSize: 16,
+          fontWeight: FontWeight.w600,
+        ),
+      ),
+    ),
+    textButtonTheme: TextButtonThemeData(
+      style: TextButton.styleFrom(
+        foregroundColor: primaryGreen,
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+        textStyle: const TextStyle(
+          fontSize: 16,
+          fontWeight: FontWeight.w600,
+        ),
       ),
     ),
     cardTheme: const CardThemeData(
