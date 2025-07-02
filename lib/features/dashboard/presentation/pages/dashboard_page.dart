@@ -407,20 +407,20 @@ class DashboardPage extends StatelessWidget {
             Expanded(
               child: _buildActionCard(
                 context,
-                'Governance',
-                Icons.how_to_vote,
+                'Stake BLOCKVEST',
+                Icons.trending_up,
                 AppTheme.accentGreen,
-                () => context.go(AppRouter.governance),
+                () => context.go(AppRouter.staking),
               ),
             ),
             const SizedBox(width: AppTheme.spacingM),
             Expanded(
               child: _buildActionCard(
                 context,
-                'Settings',
-                Icons.settings,
-                AppTheme.textSecondary,
-                () => context.go(AppRouter.settings),
+                'Governance',
+                Icons.how_to_vote,
+                AppTheme.primaryGreen,
+                () => context.go(AppRouter.governance),
               ),
             ),
           ],
