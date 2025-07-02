@@ -9,6 +9,11 @@ import '../bloc/investment_state.dart';
 import 'investment_confirmation_dialog.dart';
 import 'investment_processing_dialog.dart';
 import 'investment_success_dialog.dart';
+import '../../../../core/services/biometric_service.dart';
+import '../../../../core/theme/app_theme.dart';
+import '../../../../core/di/injection_container.dart' as di;
+import '../../../../shared/widgets/blockvest_button.dart';
+import '../../../../shared/widgets/blockvest_input_field.dart';
 
 class InvestmentBottomSheet extends StatefulWidget {
   final Project project;
@@ -25,6 +30,7 @@ class _InvestmentBottomSheetState extends State<InvestmentBottomSheet> {
 
   double? _investmentAmount;
   bool _isAmountValid = false;
+  late final BiometricService _biometricService;
 
   @override
   void initState() {

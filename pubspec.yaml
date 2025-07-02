@@ -50,6 +50,8 @@ dependencies:
   # Security & Storage
   flutter_secure_storage: ^9.0.0
   shared_preferences: ^2.2.2
+  local_auth: ^2.1.6
+  flutter_face_api: ^6.1.0
 
   # Networking
   connectivity_plus: ^5.0.2
