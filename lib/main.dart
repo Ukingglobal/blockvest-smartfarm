@@ -51,9 +51,9 @@ class BlockVestApp extends StatelessWidget {
           return MaterialApp.router(
             title: 'BlockVest',
             debugShowCheckedModeBanner: false,
-            theme: AppTheme.lightTheme,
-            darkTheme: AppTheme.darkTheme,
-            themeMode: themeMode,
+            theme: AppTheme.mainTheme, // Use the new mainTheme
+            darkTheme: AppTheme.darkTheme, // This is now an alias for mainTheme
+            themeMode: themeMode, // Theme selection logic remains
             locale: locale,
             routerConfig: AppRouter.router,
             localizationsDelegates: const [

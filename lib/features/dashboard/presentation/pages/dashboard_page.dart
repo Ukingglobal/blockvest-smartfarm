@@ -25,11 +25,20 @@ class DashboardPage extends StatelessWidget {
             context.go(AppRouter.login);
           }
         },
-        child: SingleChildScrollView(
-          padding: const EdgeInsets.all(16.0),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
+        child: RefreshIndicator(
+          onRefresh: () async {
+            // Dispatch event to reload user data, which might include KYC status
+            context.read<AuthBloc>().add(const LoadUserRequested());
+            // TODO: Dispatch events to refresh portfolio, project counts, etc.
+            // This might require new events in existing Blocs or a dedicated DashboardBloc.
+            // For now, we primarily refresh AuthBloc related data.
+          },
+          child: SingleChildScrollView(
+            physics: const AlwaysScrollableScrollPhysics(), // Important for RefreshIndicator
+            padding: const EdgeInsets.all(16.0),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
               // Welcome section
               BlocBuilder<AuthBloc, AuthState>(
                 builder: (context, state) {
@@ -112,63 +121,59 @@ class DashboardPage extends StatelessWidget {
               ),
               const SizedBox(height: 16),
 
-              // Portfolio overview
+              // New Dashboard Summary Card
               Card(
+                // Card styling will come from AppTheme.mainTheme.cardTheme
                 child: Padding(
-                  padding: const EdgeInsets.all(16.0),
+                  padding: const EdgeInsets.all(AppTheme.spacingL), // Use AppTheme spacing
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        'Portfolio Overview',
-                        style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                          fontWeight: FontWeight.bold,
+                        'Account Summary', // Title for the card
+                        style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                              fontWeight: FontWeight.bold,
+                              // color will be AppTheme.textIconColor via theme
+                            ),
+                      ),
+                      const SizedBox(height: AppTheme.spacingM),
+                      Center( // Center the large balance display
+                        child: Column(
+                          children: [
+                            Text(
+                              'Total Balance',
+                              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                                    color: Theme.of(context).colorScheme.onSurface.withOpacity(0.7),
+                                  ),
+                            ),
+                            const SizedBox(height: AppTheme.spacingXS),
+                            Text(
+                              '₦1,200,000.75', // Placeholder value
+                              style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                                // titleLarge is configured for large display numbers (light weight)
+                                // color will be AppTheme.textIconColor
+                              ),
+                            ),
+                          ],
                         ),
                       ),
-                      const SizedBox(height: 16),
+                      const SizedBox(height: AppTheme.spacingL),
                       Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
-                          Expanded(
-                            child: StatCard(
-                              title: 'Total Investment',
-                              value: '₦0.00',
-                              icon: Icons.account_balance_wallet,
-                              valueColor: Colors.green,
-                            ),
-                          ),
-                          const SizedBox(width: 12),
-                          Expanded(
-                            child: StatCard(
-                              title: 'Total Returns',
-                              value: '₦0.00',
-                              icon: Icons.trending_up,
-                              valueColor: Colors.blue,
-                            ),
-                          ),
+                          _buildSummaryDetail(context, 'Total Invested', '₦850,000.00'),
+                          _buildSummaryDetail(context, 'Total Earnings', '₦350,000.75'),
                         ],
                       ),
-                      const SizedBox(height: 12),
-                      Row(
-                        children: [
-                          Expanded(
-                            child: StatCard(
-                              title: 'Active Projects',
-                              value: '0',
-                              icon: Icons.agriculture,
-                              valueColor: Colors.orange,
-                            ),
-                          ),
-                          const SizedBox(width: 12),
-                          Expanded(
-                            child: StatCard(
-                              title: '\$BLOCKVEST',
-                              value: '0.00',
-                              icon: Icons.currency_bitcoin,
-                              valueColor: Colors.purple,
-                            ),
-                          ),
-                        ],
-                      ),
+                      // Add a CTA button if needed, e.g., "View Details" or "Add Funds"
+                      // const SizedBox(height: AppTheme.spacingM),
+                      // Align(
+                      //   alignment: Alignment.centerRight,
+                      //   child: TertiaryButton(
+                      //     text: 'View Full Report',
+                      //     onPressed: () { /* TODO: Navigate to full report */ },
+                      //   ),
+                      // ),
                     ],
                   ),
                 ),
@@ -256,6 +261,28 @@ class DashboardPage extends StatelessWidget {
           ],
         ),
       ),
+    );
+  }
+
+  Widget _buildSummaryDetail(BuildContext context, String title, String value) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          title,
+          style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                color: Theme.of(context).colorScheme.onSurface.withOpacity(0.7),
+              ),
+        ),
+        const SizedBox(height: AppTheme.spacingXS),
+        Text(
+          value,
+          style: Theme.of(context).textTheme.titleSmall?.copyWith(
+            fontWeight: FontWeight.w600, // Make the value a bit more prominent
+            // color will be AppTheme.textIconColor via theme
+          ),
+        ),
+      ],
     );
   }
 }

@@ -1,342 +1,227 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:google_fonts/google_fonts.dart';
 
 class AppTheme {
-  // BlockVest Brand Colors - Exact specifications
-  static const Color primaryDarkGreen = Color(
-    0xFF1B5E20,
-  ); // Dark Green - Primary
-  static const Color accentGold = Color(0xFFFFD700); // Gold - Secondary/Accent
-  static const Color surfaceWhite = Color(
-    0xFFFFFFFF,
-  ); // White - Background/Surface
-  static const Color errorRed = Color(0xFFD32F2F); // Red - Error states
+  // New BlockVest Brand Colors based on mockup
+  static const Color primaryBackground = Color(0xFF1A2D20); // Deep, dark forest green
+  static const Color secondaryCardsModules = Color(0xFF213B2C); // Muted dark green
+  static const Color accentCTA = Color(0xFFD4A373); // Warm, earthy gold/ochre
+  static const Color textIconColor = Color(0xFFF7F7F7); // Off-white/light cream
+  static const Color statusSuccess = Color(0xFF4CAF50); // Vibrant standard green
+  static const Color errorRed = Color(0xFFD32F2F); // Red - Error states (retained)
 
-  // Extended color palette for better UX
-  static const Color primaryLight = Color(
-    0xFF4CAF50,
-  ); // Lighter green for hover states
-  static const Color primaryDark = Color(
-    0xFF0D4E12,
-  ); // Darker green for pressed states
-  static const Color goldLight = Color(
-    0xFFFFF176,
-  ); // Light gold for backgrounds
-  static const Color goldDark = Color(
-    0xFFFFB300,
-  ); // Darker gold for pressed states
-  static const Color backgroundLight = Color(0xFFF8F9FA); // Light background
-  static const Color backgroundDark = Color(0xFF121212); // Dark background
-  static const Color surfaceDark = Color(0xFF1E1E1E); // Dark surface
-  static const Color successColor = Color(0xFF4CAF50); // Success states
-  static const Color warningColor = Color(0xFFF57C00); // Warning states
-  static const Color infoColor = Color(0xFF2196F3); // Info states
+  // Derived colors
+  static const Color textOnAccentCTA = Color(0xFF1A2D20); // Dark text on light accent for contrast
+  static const Color textDisabled = Color(0x99F7F7F7); // Semi-transparent off-white
 
-  // Text colors with WCAG compliance
-  static const Color textPrimary = Color(0xFF212121); // High contrast text
-  static const Color textSecondary = Color(0xFF757575); // Medium contrast text
-  static const Color textDisabled = Color(0xFFBDBDBD); // Low contrast text
-  static const Color textOnPrimary = Color(0xFFFFFFFF); // Text on primary color
-  static const Color textOnAccent = Color(0xFF000000); // Text on accent color
+  // Text Theme using GoogleFonts.montserrat
+  static final TextTheme _textTheme = GoogleFonts.montserratTextTheme(
+    TextTheme(
+      headlineLarge: const TextStyle(fontSize: 32, fontWeight: FontWeight.bold, color: textIconColor, letterSpacing: -0.25, height: 1.2),
+      headlineMedium: const TextStyle(fontSize: 28, fontWeight: FontWeight.bold, color: textIconColor, letterSpacing: 0, height: 1.3),
+      headlineSmall: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: textIconColor, letterSpacing: 0, height: 1.3),
+      // For Display Numbers (e.g., balance): Using titleLarge with light weight
+      titleLarge: const TextStyle(fontSize: 30, fontWeight: FontWeight.w300, color: textIconColor, letterSpacing: 0, height: 1.4), // Adjusted for "Display Numbers"
+      titleMedium: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: textIconColor, letterSpacing: 0.15, height: 1.4),
+      titleSmall: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: textIconColor, letterSpacing: 0.1, height: 1.4),
+      bodyLarge: const TextStyle(fontSize: 16, fontWeight: FontWeight.normal, color: textIconColor, letterSpacing: 0.5, height: 1.5),
+      bodyMedium: const TextStyle(fontSize: 14, fontWeight: FontWeight.normal, color: textIconColor, letterSpacing: 0.25, height: 1.5),
+      bodySmall: const TextStyle(fontSize: 12, fontWeight: FontWeight.normal, color: textIconColor, letterSpacing: 0.4, height: 1.4),
+      labelLarge: TextStyle(fontSize: 16, fontWeight: FontWeight.w600, color: textOnAccentCTA, letterSpacing: 0.1, height: 1.4), // For buttons
+      labelMedium: const TextStyle(fontSize: 12, fontWeight: FontWeight.w500, color: textIconColor, letterSpacing: 0.5, height: 1.3),
+      labelSmall: const TextStyle(fontSize: 11, fontWeight: FontWeight.w500, color: textIconColor, letterSpacing: 0.5, height: 1.3),
+    ).apply(
+      bodyColor: textIconColor,
+      displayColor: textIconColor,
+    ),
+  );
 
-  // Light Theme with Material Design 3 and BlockVest branding
-  static ThemeData lightTheme = ThemeData(
+  // Main Theme (replaces lightTheme as the new default)
+  static ThemeData mainTheme = ThemeData(
+    useMaterial3: true,
+    brightness: Brightness.dark, // New design is dark
+    primaryColor: primaryBackground, // Primary color of the app
+    scaffoldBackgroundColor: primaryBackground,
+    colorScheme: ColorScheme.dark(
+      primary: accentCTA, // Key interactive elements like buttons
+      onPrimary: textOnAccentCTA, // Text on primary elements
+      secondary: accentCTA, // Other interactive elements
+      onSecondary: textOnAccentCTA, // Text on secondary elements
+      surface: secondaryCardsModules, // Background for cards, dialogs
+      onSurface: textIconColor, // Text on surface elements
+      background: primaryBackground, // Overall background
+      onBackground: textIconColor, // Text on overall background
+      error: errorRed,
+      onError: textIconColor, // Text on error elements
+    ),
+    textTheme: _textTheme,
+    appBarTheme: AppBarTheme(
+      elevation: 0,
+      centerTitle: true,
+      backgroundColor: primaryBackground, // Can be secondaryCardsModules for a different feel
+      foregroundColor: textIconColor,
+      surfaceTintColor: Colors.transparent,
+      systemOverlayStyle: SystemUiOverlayStyle.light, // Light icons on dark app bar
+      titleTextStyle: _textTheme.headlineSmall, // Using defined textTheme
+      iconTheme: const IconThemeData(color: textIconColor, size: 24),
+    ),
+    elevatedButtonTheme: ElevatedButtonThemeData(
+      style: ElevatedButton.styleFrom(
+        backgroundColor: accentCTA,
+        foregroundColor: textOnAccentCTA,
+        elevation: 2,
+        shadowColor: Colors.black.withOpacity(0.3),
+        padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
+        minimumSize: const Size(88, 48),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(radiusM)),
+        textStyle: _textTheme.labelLarge,
+      ),
+    ),
+    outlinedButtonTheme: OutlinedButtonThemeData(
+      style: OutlinedButton.styleFrom(
+        foregroundColor: accentCTA, // Text and icon color
+        side: const BorderSide(color: accentCTA, width: 1.5),
+        padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
+        minimumSize: const Size(88, 48),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(radiusM)),
+        textStyle: _textTheme.labelLarge?.copyWith(color: accentCTA),
+      ),
+    ),
+    textButtonTheme: TextButtonThemeData(
+      style: TextButton.styleFrom(
+        foregroundColor: accentCTA,
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+        minimumSize: const Size(64, 40),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(radiusS)),
+        textStyle: _textTheme.labelLarge?.copyWith(color: accentCTA, fontWeight: FontWeight.normal),
+      ),
+    ),
+    cardTheme: CardThemeData(
+      elevation: 2,
+      shadowColor: Colors.black.withOpacity(0.2),
+      surfaceTintColor: Colors.transparent,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.all(Radius.circular(radiusL)),
+      ),
+      color: secondaryCardsModules,
+      margin: const EdgeInsets.all(spacingS),
+    ),
+    inputDecorationTheme: InputDecorationTheme(
+      filled: true,
+      fillColor: secondaryCardsModules, // Or a slightly lighter shade of primaryBackground
+      border: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(radiusM),
+        borderSide: BorderSide(color: textIconColor.withOpacity(0.5), width: 1),
+      ),
+      enabledBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(radiusM),
+        borderSide: BorderSide(color: textIconColor.withOpacity(0.5), width: 1),
+      ),
+      focusedBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(radiusM),
+        borderSide: const BorderSide(color: accentCTA, width: 2),
+      ),
+      errorBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(radiusM),
+        borderSide: const BorderSide(color: errorRed, width: 1),
+      ),
+      focusedErrorBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(radiusM),
+        borderSide: const BorderSide(color: errorRed, width: 2),
+      ),
+      contentPadding: const EdgeInsets.symmetric(horizontal: spacingM, vertical: spacingM),
+      hintStyle: _textTheme.bodyMedium?.copyWith(color: textIconColor.withOpacity(0.7)),
+      labelStyle: _textTheme.bodyMedium?.copyWith(color: textIconColor.withOpacity(0.7)),
+      floatingLabelStyle: _textTheme.bodyMedium?.copyWith(color: accentCTA),
+      prefixIconColor: textIconColor.withOpacity(0.7),
+      suffixIconColor: textIconColor.withOpacity(0.7),
+    ),
+    bottomNavigationBarTheme: BottomNavigationBarThemeData(
+      backgroundColor: secondaryCardsModules, // Or primaryBackground
+      selectedItemColor: accentCTA,
+      unselectedItemColor: textIconColor.withOpacity(0.7),
+      type: BottomNavigationBarType.fixed,
+      elevation: 8,
+      selectedLabelStyle: _textTheme.labelSmall?.copyWith(color: accentCTA),
+      unselectedLabelStyle: _textTheme.labelSmall?.copyWith(color: textIconColor.withOpacity(0.7)),
+    ),
+    floatingActionButtonTheme: FloatingActionButtonThemeData(
+      backgroundColor: accentCTA,
+      foregroundColor: textOnAccentCTA,
+      elevation: 6,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(radiusCircular)),
+      extendedTextStyle: _textTheme.labelLarge,
+    ),
+    chipTheme: ChipThemeData(
+      backgroundColor: secondaryCardsModules,
+      selectedColor: accentCTA,
+      secondarySelectedColor: accentCTA.withOpacity(0.8),
+      labelStyle: _textTheme.bodySmall?.copyWith(color: textIconColor),
+      secondaryLabelStyle: _textTheme.bodySmall?.copyWith(color: textOnAccentCTA),
+      padding: const EdgeInsets.symmetric(horizontal: spacingM, vertical: spacingS),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(radiusXL)),
+      iconTheme: const IconThemeData(color: textIconColor, size: 18),
+    ),
+    progressIndicatorTheme: ProgressIndicatorThemeData(
+      color: accentCTA,
+      linearTrackColor: secondaryCardsModules.withOpacity(0.5),
+      circularTrackColor: secondaryCardsModules.withOpacity(0.5),
+    ),
+    dialogTheme: DialogTheme(
+      backgroundColor: secondaryCardsModules,
+      titleTextStyle: _textTheme.titleLarge,
+      contentTextStyle: _textTheme.bodyMedium,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(radiusL)),
+    ),
+    snackBarTheme: SnackBarThemeData(
+      backgroundColor: secondaryCardsModules,
+      contentTextStyle: _textTheme.bodyMedium?.copyWith(color: textIconColor),
+      actionTextColor: accentCTA,
+    ),
+    tooltipTheme: TooltipThemeData(
+      decoration: BoxDecoration(
+        color: secondaryCardsModules.withOpacity(0.9),
+        borderRadius: BorderRadius.circular(radiusXS),
+      ),
+      textStyle: _textTheme.bodySmall?.copyWith(color: textIconColor),
+    ),
+    tabBarTheme: TabBarTheme(
+      labelColor: accentCTA,
+      unselectedLabelColor: textIconColor.withOpacity(0.7),
+      indicatorColor: accentCTA,
+      labelStyle: _textTheme.labelLarge?.copyWith(fontWeight: FontWeight.bold),
+      unselectedLabelStyle: _textTheme.labelLarge,
+    ),
+  );
+
+  // Retain darkTheme as an alias or slight variation if needed,
+  // but mainTheme is now the primary one reflecting the new design.
+  static ThemeData darkTheme = mainTheme;
+  // Keep the old lightTheme for reference or if a true light mode is ever needed.
+  // This can be removed if not necessary.
+  static ThemeData legacyLightTheme = ThemeData(
     useMaterial3: true,
     brightness: Brightness.light,
     colorScheme: ColorScheme.fromSeed(
-      seedColor: primaryDarkGreen,
+      seedColor: const Color(0xFF1B5E20), // Old primaryDarkGreen
       brightness: Brightness.light,
-      primary: primaryDarkGreen,
-      secondary: accentGold,
-      tertiary: primaryLight,
-      surface: surfaceWhite,
+      primary: const Color(0xFF1B5E20),
+      secondary: const Color(0xFFFFD700), // Old accentGold
+      tertiary: const Color(0xFF4CAF50), // Old primaryLight
+      surface: const Color(0xFFFFFFFF), // Old surfaceWhite
       error: errorRed,
-      onPrimary: textOnPrimary,
-      onSecondary: textOnAccent,
-      onSurface: textPrimary,
-      onError: textOnPrimary,
+      onPrimary: const Color(0xFFFFFFFF), // Old textOnPrimary
+      onSecondary: const Color(0xFF000000), // Old textOnAccent
+      onSurface: const Color(0xFF212121), // Old textPrimary
+      onError: const Color(0xFFFFFFFF),
     ),
-    // Enhanced AppBar with accessibility and branding
-    appBarTheme: const AppBarTheme(
-      elevation: 0,
-      centerTitle: true,
-      backgroundColor: primaryDarkGreen,
-      foregroundColor: textOnPrimary,
-      surfaceTintColor: Colors.transparent,
-      systemOverlayStyle: SystemUiOverlayStyle.light,
-      titleTextStyle: TextStyle(
-        fontSize: 20,
-        fontWeight: FontWeight.w600,
-        color: textOnPrimary,
-        letterSpacing: 0.15,
-      ),
-      iconTheme: IconThemeData(color: textOnPrimary, size: 24),
-    ),
-    // Enhanced Button Themes
-    elevatedButtonTheme: ElevatedButtonThemeData(
-      style: ElevatedButton.styleFrom(
-        backgroundColor: accentGold,
-        foregroundColor: textOnAccent,
-        elevation: 2,
-        shadowColor: Colors.black26,
-        padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
-        minimumSize: const Size(88, 48),
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-        textStyle: const TextStyle(
-          fontSize: 16,
-          fontWeight: FontWeight.w600,
-          letterSpacing: 0.1,
-        ),
-      ),
-    ),
-    outlinedButtonTheme: OutlinedButtonThemeData(
-      style: OutlinedButton.styleFrom(
-        foregroundColor: primaryDarkGreen,
-        side: const BorderSide(color: primaryDarkGreen, width: 1.5),
-        padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
-        minimumSize: const Size(88, 48),
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-        textStyle: const TextStyle(
-          fontSize: 16,
-          fontWeight: FontWeight.w600,
-          letterSpacing: 0.1,
-        ),
-      ),
-    ),
-    textButtonTheme: TextButtonThemeData(
-      style: TextButton.styleFrom(
-        foregroundColor: primaryDarkGreen,
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-        minimumSize: const Size(64, 40),
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-        textStyle: const TextStyle(
-          fontSize: 14,
-          fontWeight: FontWeight.w500,
-          letterSpacing: 0.1,
-        ),
-      ),
-    ),
-    // Enhanced Card Theme
-    cardTheme: const CardThemeData(
-      elevation: 2,
-      shadowColor: Colors.black12,
-      surfaceTintColor: Colors.transparent,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.all(Radius.circular(16)),
-      ),
-      color: surfaceWhite,
-      margin: EdgeInsets.all(8),
-    ),
-    // Enhanced Input Theme
-    inputDecorationTheme: InputDecorationTheme(
-      filled: true,
-      fillColor: surfaceWhite,
-      border: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(12),
-        borderSide: const BorderSide(color: Colors.grey, width: 1),
-      ),
-      enabledBorder: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(12),
-        borderSide: BorderSide(color: Colors.grey.shade400, width: 1),
-      ),
-      focusedBorder: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(12),
-        borderSide: const BorderSide(color: primaryDarkGreen, width: 2),
-      ),
-      errorBorder: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(12),
-        borderSide: const BorderSide(color: errorRed, width: 1),
-      ),
-      focusedErrorBorder: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(12),
-        borderSide: const BorderSide(color: errorRed, width: 2),
-      ),
-      contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
-      hintStyle: TextStyle(color: textSecondary, fontSize: 16),
-      labelStyle: TextStyle(color: textSecondary, fontSize: 16),
-    ),
-    // Enhanced Navigation Theme
-    bottomNavigationBarTheme: const BottomNavigationBarThemeData(
-      backgroundColor: surfaceWhite,
-      selectedItemColor: primaryDarkGreen,
-      unselectedItemColor: textSecondary,
-      type: BottomNavigationBarType.fixed,
-      elevation: 8,
-      selectedLabelStyle: TextStyle(fontSize: 12, fontWeight: FontWeight.w600),
-      unselectedLabelStyle: TextStyle(
-        fontSize: 12,
-        fontWeight: FontWeight.w400,
-      ),
-    ),
-    // Enhanced FAB Theme
-    floatingActionButtonTheme: const FloatingActionButtonThemeData(
-      backgroundColor: accentGold,
-      foregroundColor: textOnAccent,
-      elevation: 6,
-      shape: CircleBorder(),
-    ),
-    // Enhanced Chip Theme
-    chipTheme: ChipThemeData(
-      backgroundColor: backgroundLight,
-      selectedColor: accentGold,
-      secondarySelectedColor: primaryLight,
-      labelStyle: const TextStyle(color: textPrimary),
-      secondaryLabelStyle: const TextStyle(color: textOnAccent),
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-    ),
+    // ... (keep other parts of old light theme if needed for reference)
   );
 
-  // Dark Theme with Material Design 3 and BlockVest branding
-  static ThemeData darkTheme = ThemeData(
-    useMaterial3: true,
-    brightness: Brightness.dark,
-    colorScheme: ColorScheme.fromSeed(
-      seedColor: primaryDarkGreen,
-      brightness: Brightness.dark,
-      primary: primaryLight,
-      secondary: accentGold,
-      tertiary: primaryDarkGreen,
-      surface: surfaceDark,
-      error: errorRed,
-      onPrimary: Colors.black,
-      onSecondary: textOnAccent,
-      onSurface: Colors.white,
-      onError: textOnPrimary,
-    ),
-    // Enhanced AppBar for dark theme
-    appBarTheme: const AppBarTheme(
-      elevation: 0,
-      centerTitle: true,
-      backgroundColor: surfaceDark,
-      foregroundColor: Colors.white,
-      surfaceTintColor: Colors.transparent,
-      systemOverlayStyle: SystemUiOverlayStyle.dark,
-      titleTextStyle: TextStyle(
-        fontSize: 20,
-        fontWeight: FontWeight.w600,
-        color: Colors.white,
-        letterSpacing: 0.15,
-      ),
-      iconTheme: IconThemeData(color: Colors.white, size: 24),
-    ),
-    // Enhanced Button Themes for dark mode
-    elevatedButtonTheme: ElevatedButtonThemeData(
-      style: ElevatedButton.styleFrom(
-        backgroundColor: accentGold,
-        foregroundColor: textOnAccent,
-        elevation: 2,
-        shadowColor: Colors.black54,
-        padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
-        minimumSize: const Size(88, 48),
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-        textStyle: const TextStyle(
-          fontSize: 16,
-          fontWeight: FontWeight.w600,
-          letterSpacing: 0.1,
-        ),
-      ),
-    ),
-    outlinedButtonTheme: OutlinedButtonThemeData(
-      style: OutlinedButton.styleFrom(
-        foregroundColor: primaryLight,
-        side: const BorderSide(color: primaryLight, width: 1.5),
-        padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
-        minimumSize: const Size(88, 48),
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-        textStyle: const TextStyle(
-          fontSize: 16,
-          fontWeight: FontWeight.w600,
-          letterSpacing: 0.1,
-        ),
-      ),
-    ),
-    textButtonTheme: TextButtonThemeData(
-      style: TextButton.styleFrom(
-        foregroundColor: primaryLight,
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-        minimumSize: const Size(64, 40),
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-        textStyle: const TextStyle(
-          fontSize: 14,
-          fontWeight: FontWeight.w500,
-          letterSpacing: 0.1,
-        ),
-      ),
-    ),
-    // Enhanced Card Theme for dark mode
-    cardTheme: const CardThemeData(
-      elevation: 2,
-      shadowColor: Colors.black54,
-      surfaceTintColor: Colors.transparent,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.all(Radius.circular(16)),
-      ),
-      color: surfaceDark,
-      margin: EdgeInsets.all(8),
-    ),
-    // Enhanced Input Theme for dark mode
-    inputDecorationTheme: InputDecorationTheme(
-      filled: true,
-      fillColor: surfaceDark,
-      border: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(12),
-        borderSide: const BorderSide(color: Colors.grey, width: 1),
-      ),
-      enabledBorder: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(12),
-        borderSide: BorderSide(color: Colors.grey.shade600, width: 1),
-      ),
-      focusedBorder: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(12),
-        borderSide: const BorderSide(color: primaryLight, width: 2),
-      ),
-      errorBorder: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(12),
-        borderSide: const BorderSide(color: errorRed, width: 1),
-      ),
-      focusedErrorBorder: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(12),
-        borderSide: const BorderSide(color: errorRed, width: 2),
-      ),
-      contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
-      hintStyle: const TextStyle(color: Colors.grey, fontSize: 16),
-      labelStyle: const TextStyle(color: Colors.grey, fontSize: 16),
-    ),
-    // Enhanced Navigation Theme for dark mode
-    bottomNavigationBarTheme: const BottomNavigationBarThemeData(
-      backgroundColor: surfaceDark,
-      selectedItemColor: primaryLight,
-      unselectedItemColor: Colors.grey,
-      type: BottomNavigationBarType.fixed,
-      elevation: 8,
-      selectedLabelStyle: TextStyle(fontSize: 12, fontWeight: FontWeight.w600),
-      unselectedLabelStyle: TextStyle(
-        fontSize: 12,
-        fontWeight: FontWeight.w400,
-      ),
-    ),
-    // Enhanced FAB Theme for dark mode
-    floatingActionButtonTheme: const FloatingActionButtonThemeData(
-      backgroundColor: accentGold,
-      foregroundColor: textOnAccent,
-      elevation: 6,
-      shape: CircleBorder(),
-    ),
-    // Enhanced Chip Theme for dark mode
-    chipTheme: ChipThemeData(
-      backgroundColor: backgroundDark,
-      selectedColor: accentGold,
-      secondarySelectedColor: primaryLight,
-      labelStyle: const TextStyle(color: Colors.white),
-      secondaryLabelStyle: const TextStyle(color: textOnAccent),
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-    ),
-  );
 
   // Custom Colors for specific use cases with BlockVest branding
-  static const Color profitGreen = successColor;
+  static const Color profitGreen = statusSuccess;
   static const Color lossRed = errorRed;
   static const Color neutralGrey = Color(0xFF9E9E9E);
   static const Color stakingBlue = infoColor;

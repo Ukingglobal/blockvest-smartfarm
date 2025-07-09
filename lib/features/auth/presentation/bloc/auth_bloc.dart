@@ -52,6 +52,10 @@ class AuthStatusChanged extends AuthEvent {
   List<Object?> get props => [user];
 }
 
+class LoadUserRequested extends AuthEvent {
+  const LoadUserRequested();
+}
+
 // States
 abstract class AuthState extends Equatable {
   const AuthState();
@@ -95,6 +99,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     on<SignUpRequested>(_onSignUpRequested);
     on<SignOutRequested>(_onSignOutRequested);
     on<AuthStatusChanged>(_onAuthStatusChanged);
+    on<LoadUserRequested>(_onLoadUserRequested); // Added handler
 
     // Listen to auth state changes
     _supabaseClient.auth.onAuthStateChange.listen((data) {
@@ -181,6 +186,31 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
         firstName: event.user!.userMetadata?['first_name'],
         lastName: event.user!.userMetadata?['last_name'],
         createdAt: DateTime.parse(event.user!.createdAt),
+      );
+      emit(AuthAuthenticated(user: user));
+    } else {
+      emit(AuthUnauthenticated());
+    }
+  }
+
+  void _onLoadUserRequested(
+    LoadUserRequested event,
+    Emitter<AuthState> emit,
+  ) {
+    final supabaseUser = _supabaseClient.auth.currentUser;
+    if (supabaseUser != null) {
+      // Potentially re-fetch user metadata if it can change and isn't updated by onAuthStateChange
+      // For now, assume supabaseUser object is sufficiently up-to-date for this refresh.
+      final user = User(
+        id: supabaseUser.id,
+        email: supabaseUser.email!,
+        firstName: supabaseUser.userMetadata?['first_name'],
+        lastName: supabaseUser.userMetadata?['last_name'],
+        // Ensure isKycVerified is also correctly populated, might need to fetch from your DB
+        isKycVerified: (state is AuthAuthenticated && (state as AuthAuthenticated).user.id == supabaseUser.id)
+            ? (state as AuthAuthenticated).user.isKycVerified // Preserve existing KYC status if possible
+            : false, // Default or fetch anew
+        createdAt: DateTime.parse(supabaseUser.createdAt!),
       );
       emit(AuthAuthenticated(user: user));
     } else {

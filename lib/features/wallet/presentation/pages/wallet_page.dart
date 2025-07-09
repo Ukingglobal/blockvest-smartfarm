@@ -209,14 +209,22 @@ class _WalletPageState extends State<WalletPage>
               IconButton(
                 icon: const Icon(Icons.filter_list),
                 onPressed: () => _showFilterDialog(context),
+                tooltip: 'Filter Transactions',
               ),
             ],
           ),
           const SizedBox(height: 16),
           Expanded(
-            child: TransactionHistoryList(
-              transactions: state.wallet.transactions,
-              isCompact: false,
+            child: RefreshIndicator(
+              onRefresh: () async {
+                context.read<WalletBloc>().add(const LoadWalletEvent());
+                // Or use RefreshBalanceEvent if it reloads transactions too
+                // context.read<WalletBloc>().add(const RefreshBalanceEvent());
+              },
+              child: TransactionHistoryList(
+                transactions: state.wallet.transactions,
+                isCompact: false,
+              ),
             ),
           ),
         ],

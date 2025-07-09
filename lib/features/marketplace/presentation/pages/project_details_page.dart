@@ -303,114 +303,94 @@ class _ProjectDetailsPageState extends State<ProjectDetailsPage>
                   ),
                 ),
 
-                // Funding Progress Card
+                // Funding Progress Card - Redesigned
                 Container(
-                  margin: const EdgeInsets.symmetric(horizontal: 16.0),
-                  padding: const EdgeInsets.all(20.0),
+                  margin: const EdgeInsets.symmetric(horizontal: AppTheme.spacingM),
+                  padding: const EdgeInsets.all(AppTheme.spacingL),
                   decoration: BoxDecoration(
-                    color: Theme.of(context).colorScheme.primaryContainer,
-                    borderRadius: BorderRadius.circular(16),
+                    color: AppTheme.secondaryCardsModules, // Use new theme color
+                    borderRadius: BorderRadius.circular(AppTheme.radiusL),
                   ),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Text(
-                            'Funding Progress',
-                            style: Theme.of(context).textTheme.titleLarge
-                                ?.copyWith(fontWeight: FontWeight.bold),
-                          ),
-                          Text(
-                            '${(project!.fundingProgress * 100).toStringAsFixed(1)}%',
-                            style: Theme.of(context).textTheme.titleLarge
-                                ?.copyWith(
-                                  fontWeight: FontWeight.bold,
-                                  color: Theme.of(context).colorScheme.primary,
-                                ),
-                          ),
-                        ],
+                      Text(
+                        'Funding Progress', // Retain title
+                        style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                              fontWeight: FontWeight.bold,
+                              color: AppTheme.textIconColor, // Use new theme text color
+                            ),
                       ),
-                      const SizedBox(height: 12),
+                      const SizedBox(height: AppTheme.spacingS),
+                      Text(
+                        '${(project!.fundingProgress * 100).toStringAsFixed(0)}% Funded', // Prominent percentage text
+                        style: Theme.of(context).textTheme.headlineSmall?.copyWith( // Larger text for percentage
+                              fontWeight: FontWeight.bold,
+                              color: AppTheme.accentCTA, // Use accent color
+                            ),
+                      ),
+                      const SizedBox(height: AppTheme.spacingM),
                       LinearProgressIndicator(
                         value: project!.fundingProgress,
-                        backgroundColor: Colors.white.withOpacity(0.3),
-                        valueColor: AlwaysStoppedAnimation<Color>(
-                          Theme.of(context).colorScheme.primary,
-                        ),
-                        minHeight: 8,
+                        backgroundColor: AppTheme.primaryBackground.withOpacity(0.5), // Darker track
+                        valueColor: const AlwaysStoppedAnimation<Color>(AppTheme.accentCTA), // Accent color for progress
+                        minHeight: 10, // Bolder progress bar
+                        borderRadius: BorderRadius.circular(AppTheme.radiusS), // Rounded corners for progress bar
                       ),
-                      const SizedBox(height: 16),
+                      const SizedBox(height: AppTheme.spacingM),
                       Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
-                          Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                'Raised',
-                                style: TextStyle(
-                                  color: Colors.grey[700],
-                                  fontSize: 14,
-                                ),
-                              ),
-                              Text(
-                                currencyFormatter.format(project!.raisedAmount),
-                                style: Theme.of(context).textTheme.titleMedium
-                                    ?.copyWith(fontWeight: FontWeight.bold),
-                              ),
-                            ],
+                          _buildFundingDetail(
+                            context,
+                            'Amount Raised',
+                            currencyFormatter.format(project!.raisedAmount),
+                            AppTheme.textIconColor.withOpacity(0.8),
+                            AppTheme.textIconColor,
                           ),
-                          Column(
-                            crossAxisAlignment: CrossAxisAlignment.end,
-                            children: [
-                              Text(
-                                'Target',
-                                style: TextStyle(
-                                  color: Colors.grey[700],
-                                  fontSize: 14,
-                                ),
-                              ),
-                              Text(
-                                currencyFormatter.format(project!.targetAmount),
-                                style: Theme.of(context).textTheme.titleMedium
-                                    ?.copyWith(fontWeight: FontWeight.bold),
-                              ),
-                            ],
+                          _buildFundingDetail(
+                            context,
+                            'Funding Goal',
+                            currencyFormatter.format(project!.targetAmount),
+                            AppTheme.textIconColor.withOpacity(0.8),
+                            AppTheme.textIconColor,
+                            isAlignmentEnd: true,
                           ),
                         ],
                       ),
-                      const SizedBox(height: 16),
+                      const SizedBox(height: AppTheme.spacingL),
+                      // Investor count and days remaining can be styled similarly or kept if they fit the new aesthetic
                       Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
-                          Icon(Icons.people, size: 16, color: Colors.grey[700]),
-                          const SizedBox(width: 4),
-                          Text(
-                            '${project!.investorCount} investors',
-                            style: TextStyle(
-                              color: Colors.grey[700],
-                              fontSize: 14,
-                            ),
+                          Row(
+                            children: [
+                              Icon(Icons.people_outline, size: 18, color: AppTheme.textIconColor.withOpacity(0.7)),
+                              const SizedBox(width: AppTheme.spacingXS),
+                              Text(
+                                '${project!.investorCount} Investors',
+                                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                                      color: AppTheme.textIconColor.withOpacity(0.8),
+                                    ),
+                              ),
+                            ],
                           ),
-                          const Spacer(),
                           if (project!.daysRemaining > 0)
                             Text(
-                              '${project!.daysRemaining} days remaining',
-                              style: TextStyle(
-                                color: project!.daysRemaining <= 7
-                                    ? Colors.red[700]
-                                    : Colors.grey[700],
-                                fontSize: 14,
-                                fontWeight: FontWeight.w500,
-                              ),
+                              '${project!.daysRemaining} days left',
+                              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                                    color: project!.daysRemaining <= 7
+                                        ? AppTheme.errorRed.withOpacity(0.9)
+                                        : AppTheme.textIconColor.withOpacity(0.8),
+                                    fontWeight: FontWeight.w500,
+                                  ),
                             ),
                         ],
                       ),
                     ],
                   ),
                 ),
-                const SizedBox(height: 20),
+                const SizedBox(height: AppTheme.spacingL), // Use AppTheme spacing
 
                 // Key Metrics
                 Padding(
@@ -740,5 +720,32 @@ class _ProjectDetailsPageState extends State<ProjectDetailsPage>
       case RiskLevel.high:
         return Colors.red;
     }
+  }
+
+  Widget _buildFundingDetail(
+    BuildContext context,
+    String title,
+    String value,
+    Color titleColor,
+    Color valueColor, {
+    bool isAlignmentEnd = false,
+  }) {
+    return Column(
+      crossAxisAlignment: isAlignmentEnd ? CrossAxisAlignment.end : CrossAxisAlignment.start,
+      children: [
+        Text(
+          title,
+          style: Theme.of(context).textTheme.bodySmall?.copyWith(color: titleColor),
+        ),
+        const SizedBox(height: AppTheme.spacingXS),
+        Text(
+          value,
+          style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                fontWeight: FontWeight.bold,
+                color: valueColor,
+              ),
+        ),
+      ],
+    );
   }
 }

@@ -72,6 +72,7 @@ dependencies:
   fl_chart: ^0.65.0
   local_auth: ^2.3.0
   crypto: ^3.0.6
+  google_fonts: ^6.1.0 # Added Google Fonts
 
 dev_dependencies:
   flutter_test:
